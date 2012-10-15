@@ -5,7 +5,7 @@ package github.alahijani.pistachio;
  */
 public abstract class MutableCaseClass<CC extends MutableCaseClass<CC>> extends CaseClass<CC> {
 
-    private final Visitor<CC, CC> assign = CaseClassImpl.assign(thisCase());
+    private final Visitor<CC> assign = CaseClassImpl.assign(thisCase());
 
     @SuppressWarnings("unchecked")
     public CC assign(CC that) {
@@ -13,7 +13,7 @@ public abstract class MutableCaseClass<CC extends MutableCaseClass<CC>> extends 
         return thisCase();
     }
 
-    public Visitor<CC, CC> assign() {
+    public Visitor<CC> assign() {
         return assign;
     }
 

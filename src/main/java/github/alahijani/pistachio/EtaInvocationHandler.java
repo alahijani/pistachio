@@ -7,7 +7,7 @@ import java.lang.reflect.Proxy;
 /**
  * @author Ali Lahijani
  */
-abstract class EtaInvocationHandler<CC extends CaseClass<CC>, V extends CaseClass.Visitor<CC, CC>>
+abstract class EtaInvocationHandler<CC extends CaseClass<CC>, V extends CaseClass.Visitor<CC>>
         implements InvocationHandler {
 
     private final Class<V> visitorClass;

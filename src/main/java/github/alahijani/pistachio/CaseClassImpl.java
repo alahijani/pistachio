@@ -14,13 +14,13 @@ class CaseClassImpl {
     }
 
     public static <CC extends MutableCaseClass<CC>>
-    CaseClass.Visitor<CC, CC> assign(final CC instance) {
+    CaseClass.Visitor<CC> assign(final CC instance) {
         return assign(instance, getAssignType(instance.getDeclaringClass()));
     }
 
     @SuppressWarnings("unchecked")
     private static <CC extends MutableCaseClass<CC>>
-    Class<? extends CaseClass.Visitor<CC, CC>>
+    Class<? extends CaseClass.Visitor<CC>>
     getAssignType(Class<CC> caseClass) {
         try {
 
@@ -36,7 +36,7 @@ class CaseClassImpl {
 
     @SuppressWarnings("unchecked")
     private static <CC extends CaseClass<CC>>
-    Class<? extends CaseClass.Visitor<CC, ?>>
+    Class<? extends CaseClass.Visitor<?>>
     getAcceptorType(Class<CC> caseClass) {
         try {
 
@@ -83,7 +83,7 @@ class CaseClassImpl {
         }
     }
 
-    private static <CC extends MutableCaseClass<CC>, V extends CaseClass.Visitor<CC, CC>>
+    private static <CC extends MutableCaseClass<CC>, V extends CaseClass.Visitor<CC>>
     V assign(final CC instance, Class<V> visitorClass) {
 
         EtaInvocationHandler<CC, V> handler = new EtaInvocationHandler<CC, V>(visitorClass) {
@@ -97,7 +97,7 @@ class CaseClassImpl {
         return newVisitor(visitorClass, handler);
     }
 
-    private static <CC extends MutableCaseClass<CC>, V extends CaseClass.Visitor<CC, CC>>
+    private static <CC extends MutableCaseClass<CC>, V extends CaseClass.Visitor<CC>>
     V newVisitor(Class<V> visitorClass, EtaInvocationHandler<CC, V> handler) {
         try {
             return visitorConstructor(visitorClass).newInstance(handler);

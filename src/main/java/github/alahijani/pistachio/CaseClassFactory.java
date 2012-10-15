@@ -7,7 +7,7 @@ import java.lang.reflect.*;
 /**
  * @author Ali Lahijani
  */
-public abstract class CaseClassFactory<CC extends CaseClass<CC>, V extends CaseClass.Visitor<CC, CC>> {
+public abstract class CaseClassFactory<CC extends CaseClass<CC>, V extends CaseClass.Visitor<CC>> {
     private Class<V> visitorClass;
     private Constructor<? extends V> visitorConstructor;
     private V eta;

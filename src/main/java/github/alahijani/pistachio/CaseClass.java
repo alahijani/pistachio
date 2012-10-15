@@ -37,19 +37,12 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
     private Object[] arguments;
 
     /**
-     *
-     * @param <CC> The case class that
-     * @param <R>  The return type of <em>every</em> declared by an interface extending this interface
+     * @param <R>  The return type of <em>every</em> method declared by interfaces extending this interface
      */
-    public interface Visitor<CC extends CaseClass<CC>, R> {
-/*
-        public R apply(CC value) default {
-            return value.accept0(this);
-        };
-*/
+    public interface Visitor<R> {
     }
 
-    public final class Acceptor<V extends Visitor<CC, R>, R> {
+    public final class Acceptor<V extends Visitor<R>, R> {
         public final R accept(V visitor) {
             return accept0(visitor);
         }
@@ -59,8 +52,8 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
 
     @SuppressWarnings("unchecked")
     public <R>
-    Acceptor<? extends Visitor<CC, R>, R> acceptor() {
-        return (Acceptor<Visitor<CC, R>, R>) acceptor;
+    Acceptor<? extends Visitor<R>, R> acceptor() {
+        return (Acceptor<Visitor<R>, R>) acceptor;
     }
 
     /**
@@ -77,8 +70,9 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
     /**
      * This method is package-private.
      */
-    final void assign0(CaseClass<CC> lvalue) {
-        assign0(lvalue.factory, lvalue.constructor, lvalue.arguments);
+    final void assign0(CC lvalue) {
+        CaseClass<CC> that = lvalue;
+        assign0(that.factory, that.constructor, that.arguments);
     }
 
     /**
@@ -90,7 +84,7 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
      */
     @SuppressWarnings("unchecked")
     final <R>
-    R accept0(Visitor<CC, R> visitor) {
+    R accept0(Visitor<R> visitor) {
         try {
             return (R) this.constructor.invoke(visitor, this.arguments);
         } catch (IllegalAccessException e) {
