@@ -18,10 +18,6 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
         return (Class<CC>) getClass();
     }
 
-//    public @interface VisitorType {
-//        Class<? extends CaseClass.Visitor> value();
-//    }
-
     /**
      * The factory used for creating this instance
      */

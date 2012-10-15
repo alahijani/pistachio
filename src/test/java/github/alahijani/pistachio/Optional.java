@@ -3,10 +3,7 @@ package github.alahijani.pistachio;
 /**
  * @author Ali Lahijani
  */
-// @CaseClass.VisitorType(Optional.Visitor.class)
-public final class Optional<T> extends CaseClass<Optional<T>>
-        // CaseClass<Optional<T>, Optional.Visitor<T, Optional<T>>>
-{
+public final class Optional<T> extends CaseClass<Optional<T>> {
 
     private Optional() {
     }

@@ -3,7 +3,6 @@ package github.alahijani.pistachio;
 /**
  * @author Ali Lahijani
  */
-// @CaseClass.VisitorType(HelloMessage.Visitor.class)
 public final class HelloMessage extends MutableCaseClass<HelloMessage> {
 
     private HelloMessage() {
