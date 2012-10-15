@@ -43,17 +43,18 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
     }
 
     /**
-     * This abstract class will be an interface in Java 8.
      *
      * @param <CC> The case class that
      * @param <R>  The return type of <em>every</em> declared by an interface extending this interface
      */
     public interface Visitor<CC extends CaseClass<CC>, R> {
 
-//        @SuppressWarnings("unchecked")
-//        public R apply(CC value) /*default*/ /*{
-//            return (R) value.accept0(this);
-//        }*/;
+/*
+        public R apply(CC value) default {
+            return value.accept0(this);
+        };
+*/
+
     }
 
     public final class Acceptor<V extends Visitor<CC, R>, R> {
@@ -86,12 +87,6 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
     public <R>
     Block<? extends Visitor<CC, R>, R> dni() {
         return (Block<? extends Visitor<CC, R>, R>) dni;
-    }
-
-
-    protected static <CC extends CaseClass<CC>, V extends CaseClass.Visitor<CC, CC>>
-    CaseClassFactory<CC, V> factory(final Class<CC> caseClass, final Class<V> visitorClass) {
-        return CaseClassFactory.get(caseClass, visitorClass);
     }
 
     /**

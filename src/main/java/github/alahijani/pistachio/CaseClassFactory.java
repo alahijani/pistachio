@@ -1,12 +1,8 @@
 package github.alahijani.pistachio;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 
 /**
  * @author Ali Lahijani
@@ -30,6 +26,7 @@ public abstract class CaseClassFactory<CC extends CaseClass<CC>, V extends CaseC
     public CaseClassFactory() {
         this(null);
     }
+
     public CaseClassFactory(V postProcessor) {
         this.postProcessor = postProcessor;
         TypeToken<CC> caseClassToken = new TypeToken<CC>(getClass()) {};
@@ -121,32 +118,6 @@ public abstract class CaseClassFactory<CC extends CaseClass<CC>, V extends CaseC
             throw (RuntimeException) e;
 
         throw new RuntimeException(e);
-    }
-
-    static Cache<Class<? extends CaseClass>, CaseClassFactory> factoryCache = CacheBuilder.newBuilder()
-            .weakKeys()
-            .build();
-
-    @SuppressWarnings("unchecked")
-    static <CC extends CaseClass<CC>, V extends CaseClass.Visitor<CC, CC>>
-    CaseClassFactory<CC, V> get(final Class<CC> caseClass, final Class<V> visitorClass) {
-        Callable<CaseClassFactory<CC, V>> loader = new Callable<CaseClassFactory<CC, V>>() {
-            @Override
-            public CaseClassFactory<CC, V> call() {
-                return new CaseClassFactory<CC, V>(caseClass, visitorClass) {
-                };
-            }
-        };
-
-        try {
-            return factoryCache.get(caseClass, loader);
-        } catch (ExecutionException e) {
-            try {
-                return loader.call();
-            } catch (Exception silly) {
-                throw handle(silly);
-            }
-        }
     }
 
 }
