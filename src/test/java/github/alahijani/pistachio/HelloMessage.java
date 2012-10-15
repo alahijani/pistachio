@@ -8,6 +8,20 @@ public final class HelloMessage extends MutableCaseClass<HelloMessage> {
     private HelloMessage() {
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public <R> Acceptor<Visitor<R>, R> acceptor() {
+        return (Acceptor) super.acceptor();
+    }
+
+    public <R> R accept(Visitor<R> visitor) {
+        return this.<R>acceptor().accept(visitor);
+    }
+
+    public Visitor<HelloMessage> assign() {
+        return (Visitor<HelloMessage>) super.assign();
+    }
+
     /**
      *
      */
@@ -19,19 +33,11 @@ public final class HelloMessage extends MutableCaseClass<HelloMessage> {
         R hello(String title, String name);
     }
 
-    public <R> R accept(Visitor<R> visitor) {
-        return CaseClass.apply(visitor, this);
-    }
-
     private static final CaseClassFactory<HelloMessage, Visitor<HelloMessage>> factory
             = new CaseClassFactory<HelloMessage, Visitor<HelloMessage>>() {};
 
     public static Visitor<HelloMessage> values() {
         return factory.eta();
-    }
-
-    public Visitor<HelloMessage> assign() {
-        return (Visitor<HelloMessage>) super.assign();
     }
 
     public static Visitor<String> toString =

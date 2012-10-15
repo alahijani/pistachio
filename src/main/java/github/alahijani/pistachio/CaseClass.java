@@ -36,11 +36,6 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
      */
     private Object[] arguments;
 
-    protected static <V extends Visitor<CC, R>, CC extends CaseClass<CC>, R>
-    R apply(V visitor, CC value) {
-        return value.accept0(visitor);
-    }
-
     /**
      *
      * @param <CC> The case class that
@@ -60,12 +55,12 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
         }
     }
 
-    private Acceptor<?, ?> acceptor = new Acceptor<>();
+    private Acceptor<Visitor<CC, ?>, ?> acceptor = new Acceptor<>();
 
     @SuppressWarnings("unchecked")
     public <R>
     Acceptor<? extends Visitor<CC, R>, R> acceptor() {
-        return (Acceptor<? extends Visitor<CC, R>, R>) acceptor;
+        return (Acceptor<Visitor<CC, R>, R>) acceptor;
     }
 
     /**

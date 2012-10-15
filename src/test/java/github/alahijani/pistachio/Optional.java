@@ -8,8 +8,14 @@ public final class Optional<T> extends CaseClass<Optional<T>> {
     private Optional() {
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public <R> Acceptor<Visitor<T, R>, R> acceptor() {
+        return (Acceptor) super.acceptor();
+    }
+
     public <R> R accept(Visitor<T, R> visitor) {
-        return apply(visitor, this);
+        return this.<R>acceptor().accept(visitor);
     }
 
     /**
