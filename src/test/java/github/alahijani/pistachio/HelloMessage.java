@@ -11,7 +11,7 @@ public final class HelloMessage extends MutableCaseClass<HelloMessage> {
     @SuppressWarnings("unchecked")
     @Override
     public <R> Acceptor<Visitor<R>, R> acceptor() {
-        return (Acceptor) super.acceptor();
+        return (Acceptor<Visitor<R>, R>) super.<R>acceptor();
     }
 
     public <R> R accept(Visitor<R> visitor) {
@@ -40,6 +40,9 @@ public final class HelloMessage extends MutableCaseClass<HelloMessage> {
         return factory.eta();
     }
 
+    /**
+     * This can be loaded from a properties file, a la GWT
+     */
     public static Visitor<String> toString =
             new Visitor<String>() {
                 @Override

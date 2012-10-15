@@ -55,7 +55,7 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
         }
     }
 
-    private Acceptor<Visitor<CC, ?>, ?> acceptor = new Acceptor<>();
+    private Acceptor<?, ?> acceptor = new Acceptor<>();
 
     @SuppressWarnings("unchecked")
     public <R>

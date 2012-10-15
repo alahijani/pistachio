@@ -11,7 +11,7 @@ public final class Optional<T> extends CaseClass<Optional<T>> {
     @SuppressWarnings("unchecked")
     @Override
     public <R> Acceptor<Visitor<T, R>, R> acceptor() {
-        return (Acceptor) super.acceptor();
+        return (Acceptor<Visitor<T, R>, R>) super.<R>acceptor();
     }
 
     public <R> R accept(Visitor<T, R> visitor) {
