@@ -8,8 +8,11 @@ import java.lang.reflect.Method;
  */
 public abstract class CaseClass<CC extends CaseClass<CC>> {
 
+    /**
+     * This method is package-private.
+     */
     @SuppressWarnings("unchecked")
-    protected final CC thisCase() {
+    final CC thisCase() {
         return (CC) this;
     }
 
@@ -44,13 +47,11 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
      * @param <R>  The return type of <em>every</em> declared by an interface extending this interface
      */
     public interface Visitor<CC extends CaseClass<CC>, R> {
-
 /*
         public R apply(CC value) default {
             return value.accept0(this);
         };
 */
-
     }
 
     public final class Acceptor<V extends Visitor<CC, R>, R> {
