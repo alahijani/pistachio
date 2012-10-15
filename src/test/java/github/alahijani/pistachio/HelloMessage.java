@@ -20,7 +20,6 @@ public final class HelloMessage extends MutableCaseClass<HelloMessage> {
     }
 
     public <R> R accept(Visitor<R> visitor) {
-        // return CaseClass.apply(visitor, this);
         return CaseClass.apply(visitor, this);
     }
 
@@ -33,12 +32,6 @@ public final class HelloMessage extends MutableCaseClass<HelloMessage> {
 
     public Visitor<HelloMessage> assign() {
         return (Visitor<HelloMessage>) super.assign();
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <R> Block<Visitor<R>, R> dni() {
-        return (Block) super.dni();
     }
 
     public static Visitor<String> toString =

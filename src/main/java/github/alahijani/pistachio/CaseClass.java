@@ -67,24 +67,6 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
         return (Acceptor<? extends Visitor<CC, R>, R>) acceptor;
     }
 
-    public interface Block<O, R> {
-        public R apply(O object);
-
-    }
-
-    private final Block<? extends Visitor<CC, ?>, ?> dni = new Block<Visitor<CC, ?>, Object>() {
-        @Override
-        public Object apply(Visitor<CC, ?> visitor) {
-            return accept0(visitor);
-        }
-    };
-
-    @SuppressWarnings("unchecked")
-    public <R>
-    Block<? extends Visitor<CC, R>, R> dni() {
-        return (Block<? extends Visitor<CC, R>, R>) dni;
-    }
-
     /**
      * This method is package-private.
      */
