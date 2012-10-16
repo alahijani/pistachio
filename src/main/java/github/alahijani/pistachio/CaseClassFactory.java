@@ -87,7 +87,10 @@ public abstract class CaseClassFactory<CC extends CaseClass<CC>, V extends CaseC
             handler = new EtaInvocationHandler<CC, V>(this.visitorClass) {
                 @Override
                 protected CC handle(V proxy, Method method, Object[] args) throws Throwable {
-                    return original.handle(proxy, method, args).accept0(postProcessor);
+                    @SuppressWarnings("unchecked")
+                    CC.Acceptor<CaseClass.Visitor<CC>, CC> acceptor = (CC.Acceptor)
+                            original.handle(proxy, method, args).<CC>acceptor();
+                    return acceptor.accept(postProcessor);
                 }
             };
         }

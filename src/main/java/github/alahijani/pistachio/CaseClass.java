@@ -44,7 +44,7 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
 
     public final class Acceptor<V extends Visitor<R>, R> {
         public final R accept(V visitor) {
-            return accept0(visitor);
+            return CaseClass.this.accept0(visitor);
         }
     }
 
@@ -83,7 +83,7 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
      * does not have a body in {@code visitor}. That's why this method is not public.
      */
     @SuppressWarnings("unchecked")
-    final <R>
+    private <R>
     R accept0(Visitor<R> visitor) {
         try {
             return (R) this.constructor.invoke(visitor, this.arguments);
