@@ -5,9 +5,8 @@ package github.alahijani.pistachio;
  */
 public abstract class MutableCaseClass<CC extends MutableCaseClass<CC>> extends CaseClass<CC> {
 
-    private final Visitor<CC> assign = CaseClassImpl.get(getDeclaringClass()).<Visitor<CC>>assign(thisCase());
+    private final Visitor<CC> assign = CaseClassImpl.get(getDeclaringClass()).selfVisitorFactory().assign(thisCase());
 
-    @SuppressWarnings("unchecked")
     public CC assign(CC that) {
         assign0(that);
         return thisCase();

@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 /**
  * @author Ali Lahijani
  */
-class CaseClassImpl<CC extends CaseClass<CC>> {
+public class CaseClassImpl<CC extends CaseClass<CC>> {
 
     private static Logger logger = Logger.getLogger(CaseClassImpl.class.getName());
 
@@ -26,36 +26,32 @@ class CaseClassImpl<CC extends CaseClass<CC>> {
         return implCache.get(caseClass);
     }
 
-    private final Class<? extends CaseClass.Visitor<?>> visitorClass;
-    private Constructor<? extends CaseClass.Visitor<?>> visitorConstructor;
+    private final CaseVisitorFactory<?, ?> caseVisitorFactory;
+    private final SelfVisitorFactory<?, ?> selfVisitorFactory;
 
-    @SuppressWarnings("unchecked")
-    private <R, V extends CaseClass.Visitor<R>>
-    Class<V> visitorClass() {
-        return (Class<V>) visitorClass;
+    private <V extends CaseClass.Visitor<CC>>
+    CaseClassImpl(Class<CC> caseClass) {
+        Class<V> visitorClass = CaseClassImpl.<CC, CC, V>getAcceptorType(caseClass);
+
+        caseVisitorFactory = new CaseVisitorFactory<>(visitorClass);
+        selfVisitorFactory = new SelfVisitorFactory<>(visitorClass, caseClass);
     }
 
     @SuppressWarnings("unchecked")
-    private <R, V extends CaseClass.Visitor<R>>
-    Constructor<V> visitorConstructor() {
-        return (Constructor<V>) visitorConstructor;
-    }
-
-    private CaseClassImpl(Class<CC> caseClass) {
-        this.visitorClass = getAcceptorType(caseClass);
-        this.visitorConstructor = visitorConstructor(visitorClass);
-    }
-
-/*
     public <R, V extends CaseClass.Visitor<R>>
-    V uniformVisitor() {
-        return null;
+    CaseVisitorFactory<R, V> caseVisitorFactory() {
+        return (CaseVisitorFactory<R, V>) caseVisitorFactory;
     }
-*/
+
     @SuppressWarnings("unchecked")
-    private static <CC extends CaseClass<CC>>
-    Class<? extends CaseClass.Visitor<?>>
-    getAcceptorType(Class<CC> caseClass) {
+    public <V extends CaseClass.Visitor<CC>>
+    SelfVisitorFactory<CC, V> selfVisitorFactory() {
+        return (SelfVisitorFactory<CC, V>) selfVisitorFactory;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <CC extends CaseClass<CC>, R, V extends CaseClass.Visitor<R>>
+    Class<V> getAcceptorType(Class<CC> caseClass) {
         try {
 
             Method acceptor = caseClass.getMethod("acceptor");
@@ -96,32 +92,6 @@ class CaseClassImpl<CC extends CaseClass<CC>> {
             } else {
                 throw new AssertionError("Strange kind of java.lang.reflect.Type: " + type);
             }
-        }
-    }
-
-    public <V extends CaseClass.Visitor<CC>>
-    V assign(final CC instance) {
-
-        VisitorInvocationHandler<CC, V> handler = new VisitorInvocationHandler<CC, V>(this.<CC, V>visitorClass()) {
-            @Override
-            protected CC handle(V proxy, Method method, Object[] args) throws Throwable {
-                instance.assign0(null, method, args);
-                return instance;
-            }
-        };
-
-        return handler.newVisitor(this.<CC, V>visitorConstructor());
-    }
-
-    private static <V extends CaseClass.Visitor<?>>
-    Constructor<? extends V> visitorConstructor(Class<V> visitorClass) {
-        try {
-            Class<? extends V> proxyClass =
-                    Proxy.getProxyClass(visitorClass.getClassLoader(), visitorClass).asSubclass(visitorClass);
-            return proxyClass.getConstructor(InvocationHandler.class);
-        } catch (NoSuchMethodException e) {
-            // this cannot happen, unless as an internal error of the VM
-            throw new InternalError(e.toString(), e);
         }
     }
 
