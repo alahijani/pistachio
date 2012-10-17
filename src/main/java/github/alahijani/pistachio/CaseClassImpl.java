@@ -103,8 +103,8 @@ class CaseClassImpl {
         return newVisitor(visitorClass, handler);
     }
 
-    private static <CC extends MutableCaseClass<CC>, V extends CaseClass.Visitor<CC>>
-    V newVisitor(Class<V> visitorClass, VisitorInvocationHandler<CC, V> handler) {
+    private static <R, V extends CaseClass.Visitor<R>>
+    V newVisitor(Class<V> visitorClass, VisitorInvocationHandler<R, V> handler) {
         try {
             return visitorConstructor(visitorClass).newInstance(handler);
         } catch (IllegalAccessException |
@@ -115,9 +115,16 @@ class CaseClassImpl {
         }
     }
 
-    private static <V extends CaseClass.Visitor>
-    Constructor<V> visitorConstructor(Class<V> visitorClass) {
-        return null;                                          // todo
+    private static <V extends CaseClass.Visitor<?>>
+    Constructor<? extends V> visitorConstructor(Class<V> visitorClass) {
+        try {
+            Class<? extends V> proxyClass =
+                    Proxy.getProxyClass(visitorClass.getClassLoader(), visitorClass).asSubclass(visitorClass);
+            return proxyClass.getConstructor(InvocationHandler.class);
+        } catch (NoSuchMethodException e) {
+            // this cannot happen, unless as an internal error of the VM
+            throw new InternalError(e.toString(), e);
+        }
     }
 
 }
