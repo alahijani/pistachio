@@ -1,8 +1,6 @@
 package github.alahijani.pistachio;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.lang.reflect.*;
 
 /**
  * @author Ali Lahijani
@@ -55,6 +53,17 @@ abstract class VisitorInvocationHandler<R, V extends CaseClass.Visitor<R>>
     private Object handleCommonMethod(Object proxy, Method method, Object[] args) {
         // assert CaseClass.Visitor.class.getMethod("apply", CaseClass.class).equals(method);
         return null;
+    }
+
+    public V newVisitor(Constructor<? extends V> visitorConstructor) {
+        try {
+            return visitorConstructor.newInstance(this);
+        } catch (IllegalAccessException |
+                InstantiationException |
+                InvocationTargetException e) {
+            // this cannot happen, unless as an internal error of the VM
+            throw new InternalError(e.toString(), e);
+        }
     }
 
 }

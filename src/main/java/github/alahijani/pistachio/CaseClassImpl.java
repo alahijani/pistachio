@@ -110,19 +110,7 @@ class CaseClassImpl<CC extends CaseClass<CC>> {
             }
         };
 
-        return newVisitor(handler);
-    }
-
-    private <R, V extends CaseClass.Visitor<R>>
-    V newVisitor(VisitorInvocationHandler<R, V> handler) {
-        try {
-            return this.<R, V>visitorConstructor().newInstance(handler);
-        } catch (IllegalAccessException |
-                InstantiationException |
-                InvocationTargetException e) {
-            // this cannot happen, unless as an internal error of the VM
-            throw new InternalError(e.toString(), e);
-        }
+        return handler.newVisitor(this.<CC, V>visitorConstructor());
     }
 
     private static <V extends CaseClass.Visitor<?>>
