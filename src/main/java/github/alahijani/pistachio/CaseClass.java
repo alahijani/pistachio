@@ -44,6 +44,13 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
 
     private Acceptor<?, ?> acceptor = new Acceptor<>();
 
+    /**
+     * The covariant return type of this method in a subclass of <code>CaseClass</code> defines the type of
+     * visitors that the case class wills to accept.
+     * <p/>
+     * A concrete case class should override this method and cast the result to {@code Acceptor<Visitor<R>, R>} where
+     * <code>Visitor</code> is the actual sub-interface of {@link CaseVisitor} that it wills to accept.
+     */
     @SuppressWarnings("unchecked")
     public <R>
     Acceptor<? extends CaseVisitor<R>, R> acceptor() {

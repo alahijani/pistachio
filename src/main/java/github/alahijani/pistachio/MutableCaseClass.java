@@ -12,6 +12,10 @@ public abstract class MutableCaseClass<CC extends MutableCaseClass<CC>> extends 
         return thisCase();
     }
 
+    /**
+     * A concrete mutable case class should override this method and cast the result to the actual sub-interface of
+     * <code>CaseVisitor</code>.
+     */
     public CaseVisitor<CC> assign() {
         return assign;
     }
