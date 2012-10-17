@@ -7,12 +7,12 @@ import java.lang.reflect.Proxy;
 /**
  * @author Ali Lahijani
  */
-abstract class EtaInvocationHandler<CC extends CaseClass<CC>, V extends CaseClass.Visitor<CC>>
+abstract class VisitorInvocationHandler<R, V extends CaseClass.Visitor<R>>
         implements InvocationHandler {
 
     private final Class<V> visitorClass;
 
-    public EtaInvocationHandler(Class<V> visitorClass) {
+    public VisitorInvocationHandler(Class<V> visitorClass) {
         this.visitorClass = visitorClass;
     }
 
@@ -32,14 +32,17 @@ abstract class EtaInvocationHandler<CC extends CaseClass<CC>, V extends CaseClas
         return handle(visitorClass.cast(proxy), method, args);
     }
 
-    protected abstract CC handle(V proxy, Method method, Object[] args) throws Throwable;
+    protected abstract R handle(V proxy, Method method, Object[] args) throws Throwable;
 
-    private Object handleObjectMethod(InvocationHandler handler, Object proxy, Method method, Object[] args) {
+    /**
+     * Actually there is nothing Visitor-specific about this method
+     */
+    private static Object handleObjectMethod(InvocationHandler handler, Object proxy, Method method, Object[] args) {
         switch (method.getName()) {
             case "equals":
                 assert args.length == 1;
                 Object that = args[0];
-                return getClass().isInstance(that) && Proxy.getInvocationHandler(that) == handler;
+                return Proxy.isProxyClass(proxy.getClass()) && Proxy.getInvocationHandler(that) == handler;
             case "hashCode":
                 return System.identityHashCode(proxy);
             case "toString":

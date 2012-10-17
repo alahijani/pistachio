@@ -18,6 +18,12 @@ class CaseClassImpl {
         return assign(instance, getAssignType(instance.getDeclaringClass()));
     }
 
+/*
+    public static <CC extends MutableCaseClass<CC>, V extends CaseClass.Visitor<R>, R>
+    V uniformVisitor() {
+        return null;
+    }
+*/
     @SuppressWarnings("unchecked")
     private static <CC extends MutableCaseClass<CC>>
     Class<? extends CaseClass.Visitor<CC>>
@@ -86,7 +92,7 @@ class CaseClassImpl {
     private static <CC extends MutableCaseClass<CC>, V extends CaseClass.Visitor<CC>>
     V assign(final CC instance, Class<V> visitorClass) {
 
-        EtaInvocationHandler<CC, V> handler = new EtaInvocationHandler<CC, V>(visitorClass) {
+        VisitorInvocationHandler<CC, V> handler = new VisitorInvocationHandler<CC, V>(visitorClass) {
             @Override
             protected CC handle(V proxy, Method method, Object[] args) throws Throwable {
                 instance.assign0(null, method, args);
@@ -98,7 +104,7 @@ class CaseClassImpl {
     }
 
     private static <CC extends MutableCaseClass<CC>, V extends CaseClass.Visitor<CC>>
-    V newVisitor(Class<V> visitorClass, EtaInvocationHandler<CC, V> handler) {
+    V newVisitor(Class<V> visitorClass, VisitorInvocationHandler<CC, V> handler) {
         try {
             return visitorConstructor(visitorClass).newInstance(handler);
         } catch (IllegalAccessException |

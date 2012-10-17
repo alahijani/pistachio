@@ -60,7 +60,7 @@ public abstract class CaseClassFactory<CC extends CaseClass<CC>, V extends CaseC
 
             visitorConstructor = proxyClass.getConstructor(InvocationHandler.class);
 
-            EtaInvocationHandler<CC, V> handler = new EtaInvocationHandler<CC, V>(this.visitorClass) {
+            VisitorInvocationHandler<CC, V> handler = new VisitorInvocationHandler<CC, V>(this.visitorClass) {
                 @Override
                 protected CC handle(V proxy, Method method, Object[] args) throws Throwable {
                     try {
@@ -81,10 +81,10 @@ public abstract class CaseClassFactory<CC extends CaseClass<CC>, V extends CaseC
         }
     }
 
-    private V newVisitor(EtaInvocationHandler<CC, V> handler) {
+    private V newVisitor(VisitorInvocationHandler<CC, V> handler) {
         if (postProcessor != null) {
-            final EtaInvocationHandler<CC, V> original = handler;
-            handler = new EtaInvocationHandler<CC, V>(this.visitorClass) {
+            final VisitorInvocationHandler<CC, V> original = handler;
+            handler = new VisitorInvocationHandler<CC, V>(this.visitorClass) {
                 @Override
                 protected CC handle(V proxy, Method method, Object[] args) throws Throwable {
                     @SuppressWarnings("unchecked")
