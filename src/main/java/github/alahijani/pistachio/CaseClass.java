@@ -9,6 +9,20 @@ import java.lang.reflect.Method;
 public abstract class CaseClass<CC extends CaseClass<CC>> {
 
     /**
+     * @param e Is thrown, wrapped in a RuntimeException if necessary
+     * @return Never, hence the type
+     */
+    static AssertionError handle(Throwable e) {
+        if (e instanceof Error)
+            throw (Error) e;
+
+        if (e instanceof RuntimeException)
+            throw (RuntimeException) e;
+
+        throw new RuntimeException(e);
+    }
+
+    /**
      * This method is package-private.
      */
     @SuppressWarnings("unchecked")
@@ -88,9 +102,9 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
         try {
             return (R) this.constructor.invoke(visitor, this.arguments);
         } catch (IllegalAccessException e) {
-            throw CaseClassFactory.handle(e);
+            throw handle(e);
         } catch (InvocationTargetException e) {
-            throw CaseClassFactory.handle(e.getCause());
+            throw handle(e.getCause());
         }
     }
 

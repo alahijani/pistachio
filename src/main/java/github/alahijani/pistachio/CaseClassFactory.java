@@ -109,18 +109,4 @@ public abstract class CaseClassFactory<CC extends CaseClass<CC>, V extends CaseC
         return eta;
     }
 
-    /**
-     * @param e Is thrown, wrapped in a RuntimeException if necessary
-     * @return Never, hence the type
-     */
-    static AssertionError handle(Throwable e) {
-        if (e instanceof Error)
-            throw (Error) e;
-
-        if (e instanceof RuntimeException)
-            throw (RuntimeException) e;
-
-        throw new RuntimeException(e);
-    }
-
 }
