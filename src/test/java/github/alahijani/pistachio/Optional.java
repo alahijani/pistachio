@@ -27,12 +27,12 @@ public final class Optional<T> extends CaseClass<Optional<T>> {
         R something(T t);
     }
 
-    private static final CaseClassFactory<Optional<Object>, Visitor<Object, Optional<Object>>> factory =
-            new CaseClassFactory<Optional<Object>, Visitor<Object, Optional<Object>>>() {};
+    private static final SelfVisitorFactory factory
+            = CaseClassImpl.get(Optional.class).selfVisitorFactory();
 
     @SuppressWarnings("unchecked")
     public static <T> Visitor<T, Optional<T>> values() {
-        return (Visitor) factory.eta();
+        return (Visitor) factory.selfVisitor();
     }
 
     public static void main(String[] args) {

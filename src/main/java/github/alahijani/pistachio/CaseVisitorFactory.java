@@ -12,7 +12,7 @@ public class CaseVisitorFactory<R, V extends CaseClass.Visitor<R>> {
     protected final Class<V> visitorClass;
     protected final Constructor<? extends V> visitorConstructor;
 
-    CaseVisitorFactory(Class<V> visitorClass) {
+    public CaseVisitorFactory(Class<V> visitorClass) {
         this.visitorClass = visitorClass;
         this.visitorConstructor = visitorConstructor(this.visitorClass);
     }

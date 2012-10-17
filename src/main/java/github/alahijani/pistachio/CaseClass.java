@@ -9,20 +9,6 @@ import java.lang.reflect.Method;
 public abstract class CaseClass<CC extends CaseClass<CC>> {
 
     /**
-     * @param e Is thrown, wrapped in a RuntimeException if necessary
-     * @return Never, hence the type
-     */
-    static AssertionError handle(Throwable e) {
-        if (e instanceof Error)
-            throw (Error) e;
-
-        if (e instanceof RuntimeException)
-            throw (RuntimeException) e;
-
-        throw new RuntimeException(e);
-    }
-
-    /**
      * This method is package-private.
      */
     @SuppressWarnings("unchecked")
@@ -38,7 +24,7 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
     /**
      * The factory used for creating this instance
      */
-    private CaseClassFactory<CC, ?> factory;
+    private SelfVisitorFactory<CC, ?> factory;
 
     /**
      * A method declared in a subclass of {@link Visitor} that has been used to create this instance
@@ -73,7 +59,7 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
     /**
      * This method is package-private.
      */
-    final void assign0(CaseClassFactory<CC, ?> factory, Method constructor, Object... arguments) {
+    final void assign0(SelfVisitorFactory<CC, ?> factory, Method constructor, Object... arguments) {
         assert this.factory == null || this.factory == factory;
 
         this.factory = factory;
@@ -106,6 +92,20 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
         } catch (InvocationTargetException e) {
             throw handle(e.getCause());
         }
+    }
+
+    /**
+     * @param e Is thrown, wrapped in a RuntimeException if necessary
+     * @return Never, hence the type
+     */
+    static AssertionError handle(Throwable e) {
+        if (e instanceof Error)
+            throw (Error) e;
+
+        if (e instanceof RuntimeException)
+            throw (RuntimeException) e;
+
+        throw new RuntimeException(e);
     }
 
 }
