@@ -21,7 +21,7 @@ public final class Optional<T> extends CaseClass<Optional<T>> {
     /**
      *
      */
-    public interface Visitor<T, R> extends CaseClass.Visitor<R> {
+    public interface Visitor<T, R> extends CaseVisitor<R> {
         R nothing();
 
         R something(T t);

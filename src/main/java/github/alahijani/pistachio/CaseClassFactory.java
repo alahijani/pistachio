@@ -29,7 +29,7 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
     private final CaseVisitorFactory<?, ?> caseVisitorFactory;
     private final SelfVisitorFactory<?, ?> selfVisitorFactory;
 
-    private <V extends CaseClass.Visitor<CC>>
+    private <V extends CaseVisitor<CC>>
     CaseClassFactory(Class<CC> caseClass) {
         Class<V> visitorClass = CaseClassFactory.<CC, CC, V>getAcceptorType(caseClass);
 
@@ -38,19 +38,19 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
     }
 
     @SuppressWarnings("unchecked")
-    public <R, V extends CaseClass.Visitor<R>>
+    public <R, V extends CaseVisitor<R>>
     CaseVisitorFactory<R, V> caseVisitorFactory() {
         return (CaseVisitorFactory<R, V>) caseVisitorFactory;
     }
 
     @SuppressWarnings("unchecked")
-    public <V extends CaseClass.Visitor<CC>>
+    public <V extends CaseVisitor<CC>>
     SelfVisitorFactory<CC, V> selfVisitorFactory() {
         return (SelfVisitorFactory<CC, V>) selfVisitorFactory;
     }
 
     @SuppressWarnings("unchecked")
-    private static <CC extends CaseClass<CC>, R, V extends CaseClass.Visitor<R>>
+    private static <CC extends CaseClass<CC>, R, V extends CaseVisitor<R>>
     Class<V> getAcceptorType(Class<CC> caseClass) {
         try {
 
@@ -61,14 +61,14 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
                 logger.severe("Raw return type found for method " + acceptor);
 
                 assert returnType == CaseClass.Acceptor.class;
-                return (Class) CaseClass.Visitor.class;
+                return (Class) CaseVisitor.class;
             } else if (returnType instanceof ParameterizedType) {
                 ParameterizedType parameterizedType = (ParameterizedType) returnType;
 
                 assert parameterizedType.getRawType() == CaseClass.Acceptor.class;
                 Type visitorType = parameterizedType.getActualTypeArguments()[0];
 
-                return (Class) getRawType(visitorType).asSubclass(CaseClass.Visitor.class);
+                return (Class) getRawType(visitorType).asSubclass(CaseVisitor.class);
             } else {
                 throw new AssertionError("Strange method signature: " + acceptor);
             }

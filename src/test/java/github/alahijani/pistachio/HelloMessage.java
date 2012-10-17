@@ -25,7 +25,7 @@ public final class HelloMessage extends MutableCaseClass<HelloMessage> {
     /**
      *
      */
-    public interface Visitor<R> extends CaseClass.Visitor<R> {
+    public interface Visitor<R> extends CaseVisitor<R> {
         R helloWorld();
 
         R hello(String name);

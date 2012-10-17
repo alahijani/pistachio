@@ -7,7 +7,7 @@ import java.lang.reflect.Proxy;
 /**
  * @author Ali Lahijani
  */
-public class CaseVisitorFactory<R, V extends CaseClass.Visitor<R>> {
+public class CaseVisitorFactory<R, V extends CaseVisitor<R>> {
 
     protected final Class<V> visitorClass;
     protected final Constructor<? extends V> visitorConstructor;
@@ -22,7 +22,7 @@ public class CaseVisitorFactory<R, V extends CaseClass.Visitor<R>> {
         return null;
     }
 */
-    private static <V extends CaseClass.Visitor<?>>
+    private static <V extends CaseVisitor<?>>
     Constructor<? extends V> visitorConstructor(Class<V> visitorClass) {
         try {
             Class<? extends V> proxyClass =

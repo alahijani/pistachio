@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
 /**
 * @author Ali Lahijani
 */
-public class SelfVisitorFactory<CC extends CaseClass<CC>, V extends CaseClass.Visitor<CC>>
+public class SelfVisitorFactory<CC extends CaseClass<CC>, V extends CaseVisitor<CC>>
         extends CaseVisitorFactory<CC, V> {
 
     private final V postProcessor;
@@ -58,7 +58,7 @@ public class SelfVisitorFactory<CC extends CaseClass<CC>, V extends CaseClass.Vi
             @Override
             protected CC handle(V proxy, Method method, Object[] args) throws Throwable {
                 @SuppressWarnings("unchecked")
-                CC.Acceptor<CaseClass.Visitor<CC>, CC> acceptor = (CC.Acceptor)
+                CC.Acceptor<CaseVisitor<CC>, CC> acceptor = (CC.Acceptor)
                         handler.handle(proxy, method, args).<CC>acceptor();
                 return acceptor.accept(postProcessor);
             }

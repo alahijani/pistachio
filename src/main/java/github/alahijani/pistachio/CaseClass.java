@@ -27,7 +27,7 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
     private SelfVisitorFactory<CC, ?> factory;
 
     /**
-     * A method declared in a subclass of {@link Visitor} that has been used to create this instance
+     * A method declared in a subclass of {@link CaseVisitor} that has been used to create this instance
      */
     private Method constructor;
 
@@ -36,13 +36,7 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
      */
     private Object[] arguments;
 
-    /**
-     * @param <R>  The return type of <em>every</em> method declared by interfaces extending this interface
-     */
-    public interface Visitor<R> {
-    }
-
-    public final class Acceptor<V extends Visitor<R>, R> {
+    public final class Acceptor<V extends CaseVisitor<R>, R> {
         public final R accept(V visitor) {
             return CaseClass.this.accept0(visitor);
         }
@@ -52,8 +46,8 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
 
     @SuppressWarnings("unchecked")
     public <R>
-    Acceptor<? extends Visitor<R>, R> acceptor() {
-        return (Acceptor<Visitor<R>, R>) acceptor;
+    Acceptor<? extends CaseVisitor<R>, R> acceptor() {
+        return (Acceptor<CaseVisitor<R>, R>) acceptor;
     }
 
     /**
@@ -84,7 +78,7 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
      */
     @SuppressWarnings("unchecked")
     private <R>
-    R accept0(Visitor<R> visitor) {
+    R accept0(CaseVisitor<R> visitor) {
         try {
             return (R) this.constructor.invoke(visitor, this.arguments);
         } catch (IllegalAccessException e) {

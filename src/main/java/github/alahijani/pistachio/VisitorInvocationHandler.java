@@ -5,7 +5,7 @@ import java.lang.reflect.*;
 /**
  * @author Ali Lahijani
  */
-abstract class VisitorInvocationHandler<R, V extends CaseClass.Visitor<R>>
+abstract class VisitorInvocationHandler<R, V extends CaseVisitor<R>>
         implements InvocationHandler {
 
     private final Class<V> visitorClass;
@@ -19,7 +19,7 @@ abstract class VisitorInvocationHandler<R, V extends CaseClass.Visitor<R>>
         if (method.getDeclaringClass() == Object.class)
             handleObjectMethod(this, proxy, method, args);
 
-        if (method.getDeclaringClass() == CaseClass.Visitor.class)
+        if (method.getDeclaringClass() == CaseVisitor.class)
             return handleCommonMethod(proxy, method, args);
 
         /**
