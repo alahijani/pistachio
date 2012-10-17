@@ -19,4 +19,19 @@ public class NewHelloMessage extends CaseClass<NewHelloMessage> {
         R helloNewWorld();
     }
 
+    private static final SelfVisitorFactory<NewHelloMessage, Visitor<NewHelloMessage>> factory
+            = CaseClassFactory.get(NewHelloMessage.class).selfVisitorFactory();
+
+    public static Visitor<NewHelloMessage> values() {
+        return factory.selfVisitor();
+    }
+
+    /**
+     * Interface <code>NewHelloMessage.Visitor</code> being a subtype of <code>HelloMessage.Visitor</code>
+     * makes <code>NewHelloMessage</code> a <em>supertype</em> of <code>HelloMessage</code>. This static
+     * conversion method witnesses the inclusion of <code>HelloMessage</code>s into <code>NewHelloMessage</code>s.
+     */
+    public static NewHelloMessage from(HelloMessage instance) {
+        return instance.accept(NewHelloMessage.values());
+    }
 }
