@@ -6,23 +6,23 @@ import java.util.logging.Logger;
 /**
  * @author Ali Lahijani
  */
-public class CaseClassImpl<CC extends CaseClass<CC>> {
+public class CaseClassFactory<CC extends CaseClass<CC>> {
 
-    private static Logger logger = Logger.getLogger(CaseClassImpl.class.getName());
+    private static Logger logger = Logger.getLogger(CaseClassFactory.class.getName());
 
-    private static ClassValue<CaseClassImpl> implCache = new ClassValue<CaseClassImpl>() {
+    private static ClassValue<CaseClassFactory> implCache = new ClassValue<CaseClassFactory>() {
         @Override
-        protected CaseClassImpl computeValue(Class<?> type) {
+        protected CaseClassFactory computeValue(Class<?> type) {
             if (!CaseClass.class.isAssignableFrom(type))
                 return null;
 
-            return new CaseClassImpl<>(type.asSubclass(CaseClass.class));
+            return new CaseClassFactory<>(type.asSubclass(CaseClass.class));
         }
     };
 
     @SuppressWarnings("unchecked")
     public static <CC extends CaseClass<CC>>
-    CaseClassImpl<CC> get(Class<CC> caseClass) {
+    CaseClassFactory<CC> get(Class<CC> caseClass) {
         return implCache.get(caseClass);
     }
 
@@ -30,8 +30,8 @@ public class CaseClassImpl<CC extends CaseClass<CC>> {
     private final SelfVisitorFactory<?, ?> selfVisitorFactory;
 
     private <V extends CaseClass.Visitor<CC>>
-    CaseClassImpl(Class<CC> caseClass) {
-        Class<V> visitorClass = CaseClassImpl.<CC, CC, V>getAcceptorType(caseClass);
+    CaseClassFactory(Class<CC> caseClass) {
+        Class<V> visitorClass = CaseClassFactory.<CC, CC, V>getAcceptorType(caseClass);
 
         caseVisitorFactory = new CaseVisitorFactory<>(visitorClass);
         selfVisitorFactory = new SelfVisitorFactory<>(visitorClass, caseClass);

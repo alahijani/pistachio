@@ -34,7 +34,7 @@ public final class HelloMessage extends MutableCaseClass<HelloMessage> {
     }
 
     private static final SelfVisitorFactory<HelloMessage, Visitor<HelloMessage>> factory
-            = CaseClassImpl.get(HelloMessage.class).selfVisitorFactory();
+            = CaseClassFactory.get(HelloMessage.class).selfVisitorFactory();
 
     public static Visitor<HelloMessage> values() {
         return factory.selfVisitor();

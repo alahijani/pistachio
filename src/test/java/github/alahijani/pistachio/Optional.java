@@ -28,7 +28,7 @@ public final class Optional<T> extends CaseClass<Optional<T>> {
     }
 
     private static final SelfVisitorFactory factory
-            = CaseClassImpl.get(Optional.class).selfVisitorFactory();
+            = CaseClassFactory.get(Optional.class).selfVisitorFactory();
 
     @SuppressWarnings("unchecked")
     public static <T> Visitor<T, Optional<T>> values() {
