@@ -2,6 +2,7 @@ package github.alahijani.pistachio;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 /**
  * @author Ali Lahijani
@@ -55,6 +56,24 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
     public <R>
     Acceptor<? extends CaseVisitor<R>, R> acceptor() {
         return (Acceptor<CaseVisitor<R>, R>) acceptor;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CaseClass)) return false;
+
+        CaseClass that = (CaseClass) o;
+
+        return Arrays.equals(this.arguments, that.arguments) &&
+                (this.constructor == null ? that.constructor == null : constructor.equals(that.constructor));
+    }
+
+    @Override
+    public int hashCode() {
+        int result = constructor != null ? constructor.hashCode() : 0;
+        result = 31 * result + (arguments != null ? Arrays.hashCode(arguments) : 0);
+        return result;
     }
 
     /**
