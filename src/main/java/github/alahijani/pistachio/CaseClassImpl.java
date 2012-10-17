@@ -6,47 +6,57 @@ import java.util.logging.Logger;
 /**
  * @author Ali Lahijani
  */
-class CaseClassImpl {
+class CaseClassImpl<CC extends CaseClass<CC>> {
 
     private static Logger logger = Logger.getLogger(CaseClassImpl.class.getName());
 
-    private CaseClassImpl() {
+    private static ClassValue<CaseClassImpl> implCache = new ClassValue<CaseClassImpl>() {
+        @Override
+        protected CaseClassImpl computeValue(Class<?> type) {
+            if (!CaseClass.class.isAssignableFrom(type))
+                return null;
+
+            return new CaseClassImpl<>(type.asSubclass(CaseClass.class));
+        }
+    };
+
+    @SuppressWarnings("unchecked")
+    public static <CC extends CaseClass<CC>>
+    CaseClassImpl<CC> get(Class<CC> caseClass) {
+        return implCache.get(caseClass);
     }
 
-    public static <CC extends MutableCaseClass<CC>>
-    CaseClass.Visitor<CC> assign(final CC instance) {
-        return assign(instance, getAssignType(instance.getDeclaringClass()));
+    private final Class<? extends CaseClass.Visitor<?>> visitorClass;
+    private Constructor<? extends CaseClass.Visitor<?>> visitorConstructor;
+
+    @SuppressWarnings("unchecked")
+    private <R, V extends CaseClass.Visitor<R>>
+    Class<V> visitorClass() {
+        return (Class<V>) visitorClass;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <R, V extends CaseClass.Visitor<R>>
+    Constructor<V> visitorConstructor() {
+        return (Constructor<V>) visitorConstructor;
+    }
+
+    private CaseClassImpl(Class<CC> caseClass) {
+        this.visitorClass = getAcceptorType(caseClass);
+        this.visitorConstructor = visitorConstructor(visitorClass);
     }
 
 /*
-    public static <CC extends MutableCaseClass<CC>, V extends CaseClass.Visitor<R>, R>
+    public <R, V extends CaseClass.Visitor<R>>
     V uniformVisitor() {
         return null;
     }
 */
     @SuppressWarnings("unchecked")
-    private static <CC extends MutableCaseClass<CC>>
-    Class<? extends CaseClass.Visitor<CC>>
-    getAssignType(Class<CC> caseClass) {
-        try {
-
-            // todo this is reflection per instance, should be once per class
-
-            Class<?> returnType = caseClass.getMethod("assign").getReturnType();
-            return (Class) returnType.asSubclass(CaseClass.Visitor.class);
-
-        } catch (NoSuchMethodException e) {
-            throw new AssertionError(e);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
     private static <CC extends CaseClass<CC>>
     Class<? extends CaseClass.Visitor<?>>
     getAcceptorType(Class<CC> caseClass) {
         try {
-
-            // todo this is reflection per instance, should be once per class
 
             Method acceptor = caseClass.getMethod("acceptor");
 
@@ -89,10 +99,10 @@ class CaseClassImpl {
         }
     }
 
-    private static <CC extends MutableCaseClass<CC>, V extends CaseClass.Visitor<CC>>
-    V assign(final CC instance, Class<V> visitorClass) {
+    public <V extends CaseClass.Visitor<CC>>
+    V assign(final CC instance) {
 
-        VisitorInvocationHandler<CC, V> handler = new VisitorInvocationHandler<CC, V>(visitorClass) {
+        VisitorInvocationHandler<CC, V> handler = new VisitorInvocationHandler<CC, V>(this.<CC, V>visitorClass()) {
             @Override
             protected CC handle(V proxy, Method method, Object[] args) throws Throwable {
                 instance.assign0(null, method, args);
@@ -100,13 +110,13 @@ class CaseClassImpl {
             }
         };
 
-        return newVisitor(visitorClass, handler);
+        return newVisitor(handler);
     }
 
-    private static <R, V extends CaseClass.Visitor<R>>
-    V newVisitor(Class<V> visitorClass, VisitorInvocationHandler<R, V> handler) {
+    private <R, V extends CaseClass.Visitor<R>>
+    V newVisitor(VisitorInvocationHandler<R, V> handler) {
         try {
-            return visitorConstructor(visitorClass).newInstance(handler);
+            return this.<R, V>visitorConstructor().newInstance(handler);
         } catch (IllegalAccessException |
                 InstantiationException |
                 InvocationTargetException e) {
