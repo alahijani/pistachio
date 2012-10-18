@@ -38,8 +38,8 @@ public final class Optional<T> extends CaseClass<Optional<T>> {
         R some(T t);
     }
 
-    private static final SelfVisitorFactory factory =
-            CaseClassFactory.get(new Optional<>().getDeclaringClass())
+    private static final SelfVisitorFactory<?, ?> factory =
+            CaseClassFactory.get(new Optional<>())
                     .<Visitor<Object, Optional<Object>>>selfVisitorFactory();
 
     @SuppressWarnings("unchecked")
