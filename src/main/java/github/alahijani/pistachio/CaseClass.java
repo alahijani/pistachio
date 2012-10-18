@@ -25,7 +25,7 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
     /**
      * The factory used for creating this instance
      */
-    private CaseClassFactory<CC>.SelfVisitorFactory<?> factory;
+    private CaseClassFactory<CC> factory;
 
     /**
      * A method declared in a subclass of {@link CaseVisitor} that has been used to create this instance
@@ -38,7 +38,11 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
     private Object[] arguments;
 
     public CaseClassFactory<CC> getFactory() {
-        return CaseClassFactory.get(getDeclaringClass());
+        if (factory == null) {
+            factory = CaseClassFactory.get(getDeclaringClass());
+        }
+
+        return factory;
     }
 
     public final class Acceptor<V extends CaseVisitor<R>, R> {
@@ -87,7 +91,7 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
     /**
      * This method is package-private.
      */
-    final void assign0(CaseClassFactory<CC>.SelfVisitorFactory<?> factory, Method constructor, Object... arguments) {
+    final void assign0(CaseClassFactory<CC> factory, Method constructor, Object... arguments) {
         assert this.factory == null || this.factory == factory;
 
         this.factory = factory;

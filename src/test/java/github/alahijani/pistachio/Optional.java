@@ -11,7 +11,7 @@ public final class Optional<T> extends CaseClass<Optional<T>> {
     @Override
     public <R> Acceptor<Visitor<T, R>, R> acceptor() {
         CaseClassFactory.CaseVisitorFactory<R, Visitor<T, R>>
-                factory = classFactory.caseVisitorFactory();
+                factory = classFactory().caseVisitorFactory();
 
         Acceptor<?, R> acceptor = super.acceptor();
         return factory.cast(acceptor);

@@ -171,7 +171,7 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
                 protected CC handle(V proxy, Method method, Object[] args) throws Throwable {
                     try {
                         CC instance = privateConstructor.newInstance();
-                        instance.assign0(SelfVisitorFactory.this, method, args);
+                        instance.assign0(CaseClassFactory.this, method, args);
                         return instance;
                     } catch (InvocationTargetException e) {
                         throw e.getCause();
@@ -206,7 +206,7 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
             VisitorInvocationHandler<CC, V> handler = new VisitorInvocationHandler<CC, V>(visitorClass) {
                 @Override
                 protected CC handle(V proxy, Method method, Object[] args) throws Throwable {
-                    instance.assign0(SelfVisitorFactory.this, method, args);
+                    instance.assign0(CaseClassFactory.this, method, args);
                     return instance;
                 }
             };

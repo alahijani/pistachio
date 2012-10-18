@@ -5,6 +5,9 @@ package github.alahijani.pistachio;
  */
 public abstract class MutableCaseClass<CC extends MutableCaseClass<CC>> extends CaseClass<CC> {
 
+    /**
+     * TODO getFactory() needs a ClassValue lookup at this stage. This can be quite slow....
+     */
     private final CaseVisitor<CC> assign = getFactory().selfVisitorFactory().assign(thisCase());
 
     public CC assign(CC that) {
