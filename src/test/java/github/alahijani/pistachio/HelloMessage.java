@@ -8,10 +8,12 @@ public final class HelloMessage extends MutableCaseClass<HelloMessage> {
     private HelloMessage() {
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <R> Acceptor<Visitor<R>, R> acceptor() {
-        return super.<R>acceptor().cast(classFactory.<R, Visitor<R>>caseVisitorFactory());
+        CaseClassFactory.CaseVisitorFactory<R, Visitor<R>>
+                factory = classFactory.caseVisitorFactory();
+
+        return super.<R>acceptor().cast(factory);
     }
 
     public <R> R accept(Visitor<R> visitor) {
@@ -34,9 +36,11 @@ public final class HelloMessage extends MutableCaseClass<HelloMessage> {
     }
 
     private static final CaseClassFactory<HelloMessage> classFactory = CaseClassFactory.get(HelloMessage.class);
-    private static final SelfVisitorFactory<HelloMessage, Visitor<HelloMessage>> factory = classFactory.selfVisitorFactory();
 
     public static Visitor<HelloMessage> values() {
+        CaseClassFactory<HelloMessage>.SelfVisitorFactory<Visitor<HelloMessage>>
+                factory = classFactory.selfVisitorFactory();
+
         return factory.selfVisitor();
     }
 

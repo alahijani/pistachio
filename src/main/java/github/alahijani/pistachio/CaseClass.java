@@ -25,7 +25,7 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
     /**
      * The factory used for creating this instance
      */
-    private SelfVisitorFactory<CC, ?> factory;
+    private CaseClassFactory<CC>.SelfVisitorFactory<?> factory;
 
     /**
      * A method declared in a subclass of {@link CaseVisitor} that has been used to create this instance
@@ -37,6 +37,10 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
      */
     private Object[] arguments;
 
+    public CaseClassFactory<CC> getFactory() {
+        return CaseClassFactory.get(getDeclaringClass());
+    }
+
     public final class Acceptor<V extends CaseVisitor<R>, R> {
         public R accept(V visitor) {
             return CaseClass.this.accept0(visitor);
@@ -44,7 +48,7 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
 
         @SuppressWarnings("unchecked")
         public <W extends CaseVisitor<R>>
-        Acceptor<W, R> cast(CaseVisitorFactory<R, W> otherFactory) {
+        Acceptor<W, R> cast(CaseClassFactory.CaseVisitorFactory<R, W> otherFactory) {
             if (!factory.visitorClass.isAssignableFrom(otherFactory.visitorClass))
                 throw new ClassCastException(otherFactory.visitorClass.toString());
 
@@ -88,7 +92,7 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
     /**
      * This method is package-private.
      */
-    final void assign0(SelfVisitorFactory<CC, ?> factory, Method constructor, Object... arguments) {
+    final void assign0(CaseClassFactory<CC>.SelfVisitorFactory<?> factory, Method constructor, Object... arguments) {
         assert this.factory == null || this.factory == factory;
 
         this.factory = factory;

@@ -8,10 +8,12 @@ public final class Optional<T> extends CaseClass<Optional<T>> {
     private Optional() {
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <R> Acceptor<Visitor<T, R>, R> acceptor() {
-        return (Acceptor<Visitor<T, R>, R>) super.<R>acceptor();
+        CaseClassFactory.CaseVisitorFactory<R, Visitor<T, R>>
+                factory = classFactory.caseVisitorFactory();
+
+        return super.<R>acceptor().cast(factory);
     }
 
     public <R> R accept(Visitor<T, R> visitor) {
@@ -38,13 +40,19 @@ public final class Optional<T> extends CaseClass<Optional<T>> {
         R some(T t);
     }
 
-    private static final SelfVisitorFactory<?, ?> factory =
-            CaseClassFactory.get(new Optional<>())
-                    .<Visitor<Object, Optional<Object>>>selfVisitorFactory();
+    private static final CaseClassFactory<Optional<Object>> classFactory = new Optional<>().getFactory();
 
     @SuppressWarnings("unchecked")
+    private static <T>
+    CaseClassFactory<Optional<T>> classFactory() {
+        return (CaseClassFactory<Optional<T>>) classFactory;
+    }
+
     public static <T> Visitor<T, Optional<T>> values() {
-        return (Visitor<T, Optional<T>>) factory.selfVisitor();
+        CaseClassFactory<Optional<T>>.SelfVisitorFactory<Visitor<T, Optional<T>>>
+                factory = Optional.<T>classFactory().selfVisitorFactory();
+
+        return factory.selfVisitor();
     }
 
     public static void main(String[] args) {

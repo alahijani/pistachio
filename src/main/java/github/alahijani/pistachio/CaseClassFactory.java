@@ -26,14 +26,8 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
         return implCache.get(caseClass);
     }
 
-    @SuppressWarnings("unchecked")
-    public static <CC extends CaseClass<CC>>
-    CaseClassFactory<CC> get(CC instance) {
-        return implCache.get(instance.getDeclaringClass());
-    }
-
     private final CaseVisitorFactory<?, ?> caseVisitorFactory;
-    private final SelfVisitorFactory<?, ?> selfVisitorFactory;
+    private final SelfVisitorFactory<?> selfVisitorFactory;
 
     private <V extends CaseVisitor<CC>>
     CaseClassFactory(Class<CC> caseClass) {
@@ -51,8 +45,8 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
 
     @SuppressWarnings("unchecked")
     public <V extends CaseVisitor<CC>>
-    SelfVisitorFactory<CC, V> selfVisitorFactory() {
-        return (SelfVisitorFactory<CC, V>) selfVisitorFactory;
+    SelfVisitorFactory<V> selfVisitorFactory() {
+        return (SelfVisitorFactory<V>) selfVisitorFactory;
     }
 
     @SuppressWarnings("unchecked")
@@ -101,4 +95,183 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
         }
     }
 
+    /**
+     * @author Ali Lahijani
+     */
+    public static class CaseVisitorFactory<R, V extends CaseVisitor<R>> {
+
+        protected final Class<V> visitorClass;
+        protected final Constructor<? extends V> visitorConstructor;
+
+        public CaseVisitorFactory(Class<V> visitorClass) {
+            this.visitorClass = visitorClass;
+            this.visitorConstructor = visitorConstructor(this.visitorClass);
+        }
+
+    /*
+        public V uniformVisitor() {
+            return null;
+        }
+    */
+        private static <V extends CaseVisitor<?>>
+        Constructor<? extends V> visitorConstructor(Class<V> visitorClass) {
+            try {
+                Class<? extends V> proxyClass =
+                        Proxy.getProxyClass(visitorClass.getClassLoader(), visitorClass).asSubclass(visitorClass);
+                return proxyClass.getConstructor(InvocationHandler.class);
+            } catch (NoSuchMethodException e) {
+                // this cannot happen, unless as an internal error of the VM
+                throw new InternalError(e.toString(), e);
+            }
+        }
+
+    }
+
+    /**
+    * @author Ali Lahijani
+    */
+    public class SelfVisitorFactory<V extends CaseVisitor<CC>>
+            extends CaseVisitorFactory<CC, V> {
+
+        private final V postProcessor;
+        private final V selfVisitor;
+
+        public SelfVisitorFactory(Class<V> visitorClass, Class<CC> caseClass) {
+            this(visitorClass, caseClass, null);
+        }
+
+        public SelfVisitorFactory(Class<V> visitorClass, Class<CC> caseClass, V postProcessor) {
+            super(visitorClass);
+            this.postProcessor = postProcessor;
+
+            final Constructor<CC> privateConstructor;
+
+            try {
+                privateConstructor = caseClass.getDeclaredConstructor();
+                privateConstructor.setAccessible(true);
+            } catch (NoSuchMethodException e) {
+                String message = "Case class " + caseClass.getName() +
+                        " should declare a private no-args constructor";
+                throw new IllegalStateException(message, e);
+            }
+
+            VisitorInvocationHandler<CC, V> handler = new VisitorInvocationHandler<CC, V>(this.visitorClass) {
+                @Override
+                protected CC handle(V proxy, Method method, Object[] args) throws Throwable {
+                    try {
+                        CC instance = privateConstructor.newInstance();
+                        instance.assign0(SelfVisitorFactory.this, method, args);
+                        return instance;
+                    } catch (InvocationTargetException e) {
+                        throw e.getCause();
+                    }
+                }
+            };
+
+            handler = applyPostProcessor(handler);
+
+            selfVisitor = handler.newVisitor(visitorConstructor);
+        }
+
+        private VisitorInvocationHandler<CC, V> applyPostProcessor(final VisitorInvocationHandler<CC, V> handler) {
+            if (postProcessor == null)
+                return handler;
+
+            return new VisitorInvocationHandler<CC, V>(this.visitorClass) {
+                @Override
+                protected CC handle(V proxy, Method method, Object[] args) throws Throwable {
+                    CC instance = handler.handle(proxy, method, args);
+                    CaseVisitorFactory<CC, CaseVisitor<CC>> factory = caseVisitorFactory();
+
+                    return instance.<CC>acceptor().cast(factory).accept(postProcessor);
+                }
+            };
+        }
+
+        public V assign(final CC instance) {
+
+            VisitorInvocationHandler<CC, V> handler = new VisitorInvocationHandler<CC, V>(visitorClass) {
+                @Override
+                protected CC handle(V proxy, Method method, Object[] args) throws Throwable {
+                    instance.assign0(SelfVisitorFactory.this, method, args);
+                    return instance;
+                }
+            };
+
+            handler = applyPostProcessor(handler);
+
+            return handler.newVisitor(visitorConstructor);
+        }
+
+        public V selfVisitor() {
+            return selfVisitor;
+        }
+
+    }
+
+    /**
+     * @author Ali Lahijani
+     */
+    abstract static class VisitorInvocationHandler<R, V extends CaseVisitor<R>>
+            implements InvocationHandler {
+
+        private final Class<V> visitorClass;
+
+        public VisitorInvocationHandler(Class<V> visitorClass) {
+            this.visitorClass = visitorClass;
+        }
+
+        @Override
+        public final Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            if (method.getDeclaringClass() == Object.class)
+                handleObjectMethod(this, proxy, method, args);
+
+            if (method.getDeclaringClass() == CaseVisitor.class)
+                return handleCommonMethod(proxy, method, args);
+
+            /**
+             * throw early if visitorClass cannot handle method
+             */
+            visitorClass.asSubclass(method.getDeclaringClass());
+
+            return handle(visitorClass.cast(proxy), method, args);
+        }
+
+        protected abstract R handle(V proxy, Method method, Object[] args) throws Throwable;
+
+        /**
+         * Actually there is nothing Visitor-specific about this method
+         */
+        private static Object handleObjectMethod(InvocationHandler handler, Object proxy, Method method, Object[] args) {
+            switch (method.getName()) {
+                case "equals":
+                    assert args.length == 1;
+                    Object that = args[0];
+                    return Proxy.isProxyClass(proxy.getClass()) && Proxy.getInvocationHandler(that) == handler;
+                case "hashCode":
+                    return System.identityHashCode(proxy);
+                case "toString":
+                    return proxy.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(proxy));
+                default:
+                    throw new AssertionError();
+            }
+        }
+
+        private Object handleCommonMethod(Object proxy, Method method, Object[] args) {
+            // assert CaseClass.Visitor.class.getMethod("apply", CaseClass.class).equals(method);
+            return null;
+        }
+
+        public V newVisitor(Constructor<? extends V> visitorConstructor) {
+            try {
+                return visitorConstructor.newInstance(this);
+            } catch (IllegalAccessException |
+                    InstantiationException |
+                    InvocationTargetException e) {
+                // this cannot happen, unless as an internal error of the VM
+                throw new InternalError(e.toString(), e);
+            }
+        }
+
+    }
 }

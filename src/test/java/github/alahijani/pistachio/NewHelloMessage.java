@@ -7,10 +7,12 @@ import java.lang.reflect.Method;
  */
 public class NewHelloMessage extends CaseClass<NewHelloMessage> {
 
-    @SuppressWarnings("unchecked")
     @Override
     public <R> Acceptor<Visitor<R>, R> acceptor() {
-        return (Acceptor<Visitor<R>, R>) super.<R>acceptor();
+        CaseClassFactory.CaseVisitorFactory<R, Visitor<R>>
+                factory = classFactory.caseVisitorFactory();
+
+        return super.<R>acceptor().cast(factory);
     }
 
     public <R> R accept(Visitor<R> visitor) {
@@ -24,10 +26,12 @@ public class NewHelloMessage extends CaseClass<NewHelloMessage> {
         R helloWorld();
     }
 
-    private static final SelfVisitorFactory<NewHelloMessage, Visitor<NewHelloMessage>> factory
-            = CaseClassFactory.get(NewHelloMessage.class).selfVisitorFactory();
+    private static final CaseClassFactory<NewHelloMessage> classFactory = CaseClassFactory.get(NewHelloMessage.class);
 
     public static Visitor<NewHelloMessage> values() {
+        CaseClassFactory<NewHelloMessage>.SelfVisitorFactory<Visitor<NewHelloMessage>>
+                factory = classFactory.selfVisitorFactory();
+
         return factory.selfVisitor();
     }
 
