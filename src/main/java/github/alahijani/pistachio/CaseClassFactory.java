@@ -26,6 +26,12 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
         return implCache.get(caseClass);
     }
 
+    @SuppressWarnings("unchecked")
+    public static <CC extends CaseClass<CC>>
+    CaseClassFactory<CC> get(CC instance) {
+        return implCache.get(instance.getDeclaringClass());
+    }
+
     private final CaseVisitorFactory<?, ?> caseVisitorFactory;
     private final SelfVisitorFactory<?, ?> selfVisitorFactory;
 
