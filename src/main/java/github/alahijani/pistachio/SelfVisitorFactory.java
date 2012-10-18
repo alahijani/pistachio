@@ -37,7 +37,7 @@ public class SelfVisitorFactory<CC extends CaseClass<CC>, V extends CaseVisitor<
             protected CC handle(V proxy, Method method, Object[] args) throws Throwable {
                 try {
                     CC instance = privateConstructor.newInstance();
-                    instance.assign0(null, method, args);
+                    instance.assign0(SelfVisitorFactory.this, method, args);
                     return instance;
                 } catch (InvocationTargetException e) {
                     throw e.getCause();
@@ -70,7 +70,7 @@ public class SelfVisitorFactory<CC extends CaseClass<CC>, V extends CaseVisitor<
         VisitorInvocationHandler<CC, V> handler = new VisitorInvocationHandler<CC, V>(visitorClass) {
             @Override
             protected CC handle(V proxy, Method method, Object[] args) throws Throwable {
-                instance.assign0(null, method, args);
+                instance.assign0(SelfVisitorFactory.this, method, args);
                 return instance;
             }
         };
