@@ -18,44 +18,56 @@ public final class Optional<T> extends CaseClass<Optional<T>> {
         return this.<R>acceptor().accept(visitor);
     }
 
+    public T orElse(final T ifNone) {
+        return accept(new Visitor<T, T>() {
+            @Override public T none() {
+                return ifNone;
+            }
+            @Override public T some(T t) {
+                return t;
+            }
+        });
+    }
+
     /**
      *
      */
     public interface Visitor<T, R> extends CaseVisitor<R> {
-        R nothing();
+        R none();
 
-        R something(T t);
+        R some(T t);
     }
 
-    private static final SelfVisitorFactory factory
-            = CaseClassFactory.get(Optional.class).selfVisitorFactory();
+    private static final SelfVisitorFactory factory =
+            CaseClassFactory.get(new Optional<>().getDeclaringClass())
+                    .<Visitor<Object, Optional<Object>>>selfVisitorFactory();
 
     @SuppressWarnings("unchecked")
     public static <T> Visitor<T, Optional<T>> values() {
-        return (Visitor) factory.selfVisitor();
+        return (Visitor<T, Optional<T>>) factory.selfVisitor();
     }
 
     public static void main(String[] args) {
 
         Visitor<Integer, Void> visitor = new Visitor<Integer, Void>() {
             @Override
-            public Void nothing() {
+            public Void none() {
                 System.out.println("Nothing!");
                 return null;
             }
 
             @Override
-            public Void something(Integer integer) {
+            public Void some(Integer integer) {
                 System.out.println("integer = " + integer);
                 return null;
             }
         };
 
 
-        Optional<Integer> optional = Optional.<Integer>values().something(1);
+        Optional<Integer> optional = Optional.<Integer>values().some(1);
         optional.accept(visitor);
 
-        optional = Optional.<Integer>values().nothing();
+        optional = Optional.<Integer>values().none();
         optional.accept(visitor);
 
     }
