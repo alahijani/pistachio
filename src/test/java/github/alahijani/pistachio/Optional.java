@@ -13,7 +13,8 @@ public final class Optional<T> extends CaseClass<Optional<T>> {
         CaseClassFactory.CaseVisitorFactory<R, Visitor<T, R>>
                 factory = classFactory.caseVisitorFactory();
 
-        return super.<R>acceptor().cast(factory);
+        Acceptor<?, R> acceptor = super.acceptor();
+        return factory.cast(acceptor);
     }
 
     public <R> R accept(Visitor<T, R> visitor) {

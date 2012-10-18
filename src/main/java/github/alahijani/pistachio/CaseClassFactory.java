@@ -125,6 +125,17 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
             }
         }
 
+        @SuppressWarnings("unchecked")
+        public <CC extends CaseClass<CC>, W extends CaseVisitor<R>>
+        CaseClass<CC>.Acceptor<V, R> cast(CaseClass<CC>.Acceptor<W, R> acceptor) {
+            CaseVisitorFactory<R, W> that = acceptor.getFactory();
+
+            if (!that.visitorClass.isAssignableFrom(this.visitorClass))
+                throw new ClassCastException(this.visitorClass.toString());
+
+            return (CC.Acceptor<V, R>) acceptor;
+        }
+
     }
 
     /**
@@ -181,9 +192,11 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
                 @Override
                 protected CC handle(V proxy, Method method, Object[] args) throws Throwable {
                     CC instance = handler.handle(proxy, method, args);
-                    CaseVisitorFactory<CC, CaseVisitor<CC>> factory = caseVisitorFactory();
 
-                    return instance.<CC>acceptor().cast(factory).accept(postProcessor);
+                    CaseClass<CC>.Acceptor<?, CC> original = instance.acceptor();
+                    CaseClass<CC>.Acceptor<V, CC> acceptor = cast(original);
+
+                    return acceptor.accept(postProcessor);
                 }
             };
         }

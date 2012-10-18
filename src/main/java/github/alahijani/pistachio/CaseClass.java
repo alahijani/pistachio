@@ -46,13 +46,8 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
             return CaseClass.this.accept0(visitor);
         }
 
-        @SuppressWarnings("unchecked")
-        public <W extends CaseVisitor<R>>
-        Acceptor<W, R> cast(CaseClassFactory.CaseVisitorFactory<R, W> otherFactory) {
-            if (!factory.visitorClass.isAssignableFrom(otherFactory.visitorClass))
-                throw new ClassCastException(otherFactory.visitorClass.toString());
-
-            return (Acceptor<W, R>) this;
+        public CaseClassFactory.CaseVisitorFactory<R, V> getFactory() {
+            return CaseClass.this.getFactory().caseVisitorFactory();
         }
     }
 

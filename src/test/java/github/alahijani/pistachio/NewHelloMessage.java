@@ -12,7 +12,8 @@ public class NewHelloMessage extends CaseClass<NewHelloMessage> {
         CaseClassFactory.CaseVisitorFactory<R, Visitor<R>>
                 factory = classFactory.caseVisitorFactory();
 
-        return super.<R>acceptor().cast(factory);
+        Acceptor<?, R> acceptor = super.acceptor();
+        return factory.cast(acceptor);
     }
 
     public <R> R accept(Visitor<R> visitor) {
