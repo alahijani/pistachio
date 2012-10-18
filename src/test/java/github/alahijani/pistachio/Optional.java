@@ -45,7 +45,7 @@ public final class Optional<T> extends CaseClass<Optional<T>> {
     @SuppressWarnings("unchecked")
     private static <T>
     CaseClassFactory<Optional<T>> classFactory() {
-        return (CaseClassFactory<Optional<T>>) classFactory;
+        return (CaseClassFactory) classFactory;
     }
 
     public static <T> Visitor<T, Optional<T>> values() {
