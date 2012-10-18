@@ -38,8 +38,17 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
     private Object[] arguments;
 
     public final class Acceptor<V extends CaseVisitor<R>, R> {
-        public final R accept(V visitor) {
+        public R accept(V visitor) {
             return CaseClass.this.accept0(visitor);
+        }
+
+        @SuppressWarnings("unchecked")
+        public <W extends CaseVisitor<R>>
+        Acceptor<W, R> cast(CaseVisitorFactory<R, W> otherFactory) {
+            if (!factory.visitorClass.isAssignableFrom(otherFactory.visitorClass))
+                throw new ClassCastException(otherFactory.visitorClass.toString());
+
+            return (Acceptor<W, R>) this;
         }
     }
 
