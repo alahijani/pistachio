@@ -9,12 +9,9 @@ public final class HelloMessage extends MutableCaseClass<HelloMessage> {
     }
 
     @Override
-    public <R> Acceptor<Visitor<R>, R> acceptor() {
-        CaseClassFactory.CaseVisitorFactory<R, Visitor<R>>
-                factory = classFactory.caseVisitorFactory();
-
-        Acceptor<?, R> acceptor = super.acceptor();
-        return factory.cast(acceptor);
+    @SuppressWarnings("unchecked")
+    public <R> Acceptor<? super Visitor<R>, R> acceptor() {
+        return (Acceptor<? super Visitor<R>, R>) super.acceptor();
     }
 
     public <R> R accept(Visitor<R> visitor) {
@@ -36,13 +33,14 @@ public final class HelloMessage extends MutableCaseClass<HelloMessage> {
         R hello(String title, String name);
     }
 
-    private static final CaseClassFactory<HelloMessage> classFactory = CaseClassFactory.get(HelloMessage.class);
+    private static final CaseClassFactory<HelloMessage> classFactory = new HelloMessage().getFactory();
 
     public static Visitor<HelloMessage> values() {
-        CaseClassFactory<HelloMessage>.SelfVisitorFactory<Visitor<HelloMessage>>
-                factory = classFactory.selfVisitorFactory();
+        return (Visitor<HelloMessage>) classFactory.values();
+    }
 
-        return factory.selfVisitor();
+    public static Visitor<HelloMessage> create() {
+        return new HelloMessage().assign();
     }
 
     /**

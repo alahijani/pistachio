@@ -46,13 +46,26 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
     }
 
     public final class Acceptor<V extends CaseVisitor<R>, R> {
+        public final Class<V> visitorClass;
+
+        /**
+         *
+         */
+        private Acceptor() {
+            visitorClass = null;
+        }
+
+        /**
+         * todo populate and use visitorClass
+         */
+        private Acceptor(Class<V> visitorClass) {
+            this.visitorClass = visitorClass;
+        }
+
         public R accept(V visitor) {
             return CaseClass.this.accept0(visitor);
         }
 
-        public CaseClassFactory.CaseVisitorFactory<R, V> getFactory() {
-            return CaseClass.this.getFactory().caseVisitorFactory();
-        }
     }
 
     private Acceptor<?, ?> acceptor = new Acceptor<>();
@@ -66,8 +79,8 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
      */
     @SuppressWarnings("unchecked")
     public <R>
-    Acceptor<? extends CaseVisitor<R>, R> acceptor() {
-        return (Acceptor<CaseVisitor<R>, R>) acceptor;
+    Acceptor<?, R> acceptor() {
+        return (Acceptor<?, R>) acceptor;
     }
 
     @Override

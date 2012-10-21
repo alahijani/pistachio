@@ -26,31 +26,23 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
         return implCache.get(caseClass);
     }
 
-    private final CaseVisitorFactory<?, ?> caseVisitorFactory;
     private final SelfVisitorFactory<?> selfVisitorFactory;
 
     private <V extends CaseVisitor<CC>>
     CaseClassFactory(Class<CC> caseClass) {
-        Class<V> visitorClass = CaseClassFactory.<CC, CC, V>getAcceptorType(caseClass);
+        Class<V> visitorClass = this.<CC, V>getAcceptorType(caseClass);
 
-        caseVisitorFactory = new CaseVisitorFactory<>(visitorClass);
         selfVisitorFactory = new SelfVisitorFactory<>(visitorClass, caseClass);
     }
 
     @SuppressWarnings("unchecked")
-    public <R, V extends CaseVisitor<R>>
-    CaseVisitorFactory<R, V> caseVisitorFactory() {
-        return (CaseVisitorFactory<R, V>) caseVisitorFactory;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <V extends CaseVisitor<CC>>
+    private <V extends CaseVisitor<CC>>
     SelfVisitorFactory<V> selfVisitorFactory() {
         return (SelfVisitorFactory<V>) selfVisitorFactory;
     }
 
     @SuppressWarnings("unchecked")
-    private static <CC extends CaseClass<CC>, R, V extends CaseVisitor<R>>
+    private <R, V extends CaseVisitor<R>>
     Class<V> getAcceptorType(Class<CC> caseClass) {
         try {
 
@@ -68,7 +60,17 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
                 assert parameterizedType.getRawType() == CaseClass.Acceptor.class;
                 Type visitorType = parameterizedType.getActualTypeArguments()[0];
 
-                return (Class) getRawType(visitorType).asSubclass(CaseVisitor.class);
+                while (true) {
+                    if (visitorType instanceof Class<?>) {
+                        return (Class<V>) ((Class) visitorType).asSubclass(CaseVisitor.class);
+                    } else if (visitorType instanceof ParameterizedType) {
+                        visitorType = ((ParameterizedType) visitorType).getRawType();
+                    } else if (visitorType instanceof WildcardType) {
+                        visitorType = ((WildcardType) visitorType).getLowerBounds()[0];
+                    } else {
+                        throw new AssertionError("Strange method signature: " + acceptor);
+                    }
+                }
             } else {
                 throw new AssertionError("Strange method signature: " + acceptor);
             }
@@ -78,27 +80,10 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
         }
     }
 
-    private static Class<?> getRawType(Type type) {
-        while (true) {
-            if (type instanceof Class<?>) {
-                return (Class) type;
-            } else if (type instanceof GenericArrayType) {
-                Class<?> componentClass = getRawType(((GenericArrayType) type).getGenericComponentType());
-                return Array.newInstance(componentClass, 0).getClass();
-            } else if (type instanceof ParameterizedType) {
-                type = ((ParameterizedType) type).getRawType();
-            } else if (type instanceof WildcardType) {
-                type = ((WildcardType) type).getUpperBounds()[0];
-            } else {
-                throw new AssertionError("Strange kind of java.lang.reflect.Type: " + type);
-            }
-        }
-    }
-
     /**
      * @author Ali Lahijani
      */
-    public static class CaseVisitorFactory<R, V extends CaseVisitor<R>> {
+    static class CaseVisitorFactory<R, V extends CaseVisitor<R>> {
 
         protected final Class<V> visitorClass;
         protected final Constructor<? extends V> visitorConstructor;
@@ -126,11 +111,10 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
         }
 
         @SuppressWarnings("unchecked")
-        public <CC extends CaseClass<CC>, W extends CaseVisitor<R>>
+        <CC extends CaseClass<CC>, W extends CaseVisitor<R>>
         CaseClass<CC>.Acceptor<V, R> cast(CaseClass<CC>.Acceptor<W, R> acceptor) {
-            CaseVisitorFactory<R, W> that = acceptor.getFactory();
 
-            if (!that.visitorClass.isAssignableFrom(this.visitorClass))
+            if (!acceptor.visitorClass.isAssignableFrom(this.visitorClass))
                 throw new ClassCastException(this.visitorClass.toString());
 
             return (CC.Acceptor<V, R>) acceptor;
@@ -138,10 +122,24 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
 
     }
 
+    public <V extends CaseVisitor<CC>>
+    V assign(CC instance, CaseClass<CC>.Acceptor<V, CC> acceptor) {
+        return this.<V>selfVisitorFactory().assign(instance);
+    }
+
+    public <V extends CaseVisitor<CC>>
+    V values(CC.Acceptor<V, CC> acceptor) {
+        return (V) this.values();
+    }
+
+    public CaseVisitor<CC> values() {
+        return selfVisitorFactory.selfVisitor();
+    }
+
     /**
     * @author Ali Lahijani
     */
-    public class SelfVisitorFactory<V extends CaseVisitor<CC>>
+    private class SelfVisitorFactory<V extends CaseVisitor<CC>>
             extends CaseVisitorFactory<CC, V> {
 
         private final V postProcessor;
@@ -190,18 +188,19 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
 
             return new VisitorInvocationHandler<CC, V>(this.visitorClass) {
                 @Override
+                @SuppressWarnings("unchecked")
                 protected CC handle(V proxy, Method method, Object[] args) throws Throwable {
                     CC instance = handler.handle(proxy, method, args);
 
                     CaseClass<CC>.Acceptor<?, CC> original = instance.acceptor();
-                    CaseClass<CC>.Acceptor<V, CC> acceptor = cast(original);
+                    CaseClass<CC>.Acceptor<V, CC> acceptor = (CC.Acceptor<V, CC>) original;
 
                     return acceptor.accept(postProcessor);
                 }
             };
         }
 
-        public V assign(final CC instance) {
+        private V assign(final CC instance) {
 
             VisitorInvocationHandler<CC, V> handler = new VisitorInvocationHandler<CC, V>(visitorClass) {
                 @Override
@@ -216,7 +215,7 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
             return handler.newVisitor(visitorConstructor);
         }
 
-        public V selfVisitor() {
+        V selfVisitor() {
             return selfVisitor;
         }
 
@@ -225,7 +224,7 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
     /**
      * @author Ali Lahijani
      */
-    abstract static class VisitorInvocationHandler<R, V extends CaseVisitor<R>>
+    private abstract static class VisitorInvocationHandler<R, V extends CaseVisitor<R>>
             implements InvocationHandler {
 
         private final Class<V> visitorClass;

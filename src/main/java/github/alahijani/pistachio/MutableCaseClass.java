@@ -8,7 +8,7 @@ public abstract class MutableCaseClass<CC extends MutableCaseClass<CC>> extends 
     /**
      * TODO getFactory() needs a ClassValue lookup at this stage. This can be quite slow....
      */
-    private final CaseVisitor<CC> assign = getFactory().selfVisitorFactory().assign(thisCase());
+    private final CaseVisitor<CC> assign = getFactory().assign(thisCase(), this.<CC>acceptor());
 
     public CC assign(CC that) {
         assign0(that);

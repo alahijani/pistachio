@@ -8,12 +8,9 @@ import java.lang.reflect.Method;
 public class NewHelloMessage extends CaseClass<NewHelloMessage> {
 
     @Override
-    public <R> Acceptor<Visitor<R>, R> acceptor() {
-        CaseClassFactory.CaseVisitorFactory<R, Visitor<R>>
-                factory = classFactory.caseVisitorFactory();
-
-        Acceptor<?, R> acceptor = super.acceptor();
-        return factory.cast(acceptor);
+    @SuppressWarnings("unchecked")
+    public <R> Acceptor<? super Visitor<R>, R> acceptor() {
+        return (Acceptor<? super Visitor<R>, R>) super.acceptor();
     }
 
     public <R> R accept(Visitor<R> visitor) {
@@ -27,13 +24,10 @@ public class NewHelloMessage extends CaseClass<NewHelloMessage> {
         R helloWorld();
     }
 
-    private static final CaseClassFactory<NewHelloMessage> classFactory = CaseClassFactory.get(NewHelloMessage.class);
+    private static final CaseClassFactory<NewHelloMessage> classFactory = new NewHelloMessage().getFactory();
 
     public static Visitor<NewHelloMessage> values() {
-        CaseClassFactory<NewHelloMessage>.SelfVisitorFactory<Visitor<NewHelloMessage>>
-                factory = classFactory.selfVisitorFactory();
-
-        return factory.selfVisitor();
+        return (Visitor<NewHelloMessage>) classFactory.values();
     }
 
     /**
@@ -54,10 +48,28 @@ public class NewHelloMessage extends CaseClass<NewHelloMessage> {
         }
 
         {
-            NewHelloMessage helloWorld1 = NewHelloMessage.values().helloWorld();
-            HelloMessage helloWorld2 = HelloMessage.values().helloWorld();
-            System.out.println("(helloWorld1 == helloWorld2) = " + helloWorld1.equals(helloWorld2));
-            System.out.println("(helloWorld1 == helloWorld2) = " + helloWorld1.equals(NewHelloMessage.from(helloWorld2)));
+            NewHelloMessage newHelloWorld = NewHelloMessage.values().helloWorld();
+            HelloMessage oldHelloWorld = HelloMessage.values().helloWorld();
+            System.out.println("(newHelloWorld == oldHelloWorld) = " + newHelloWorld.equals(oldHelloWorld));
+            System.out.println("(newHelloWorld == oldHelloWorld) = " + newHelloWorld.equals(NewHelloMessage.from(oldHelloWorld)));
+
+            CaseClass<?>.Acceptor<? super NewHelloMessage.Visitor<Void>, Void> newAcceptor = newHelloWorld.acceptor();
+            CaseClass<?>.Acceptor<? super HelloMessage.Visitor<Void>, Void> oldAcceptor = oldHelloWorld.acceptor();
+
+            newAcceptor = oldAcceptor;
+//            oldAcceptor = newAcceptor;
+
+            NewHelloMessage.Visitor<Void> newVisitor = null;
+            HelloMessage.Visitor<Void> oldVisitor = null;
+
+            CaseVisitor<Void> caseVisitor = null;
+            newAcceptor.accept(newVisitor);
+            oldAcceptor.accept(newVisitor);
+            oldAcceptor.accept(oldVisitor);
+
+//            newAcceptor.accept(oldVisitor);
+//            oldAcceptor.accept(caseVisitor);
+//            newAcceptor.accept(caseVisitor);
         }
     }
 }

@@ -9,12 +9,9 @@ public final class Optional<T> extends CaseClass<Optional<T>> {
     }
 
     @Override
-    public <R> Acceptor<Visitor<T, R>, R> acceptor() {
-        CaseClassFactory.CaseVisitorFactory<R, Visitor<T, R>>
-                factory = classFactory().caseVisitorFactory();
-
-        Acceptor<?, R> acceptor = super.acceptor();
-        return factory.cast(acceptor);
+    @SuppressWarnings("unchecked")
+    public <R> Acceptor<? super Visitor<T, R>, R> acceptor() {
+        return (Acceptor<? super Visitor<T, R>, R>) super.acceptor();
     }
 
     public <R> R accept(Visitor<T, R> visitor) {
@@ -41,19 +38,11 @@ public final class Optional<T> extends CaseClass<Optional<T>> {
         R some(T t);
     }
 
-    private static final CaseClassFactory<Optional<Object>> classFactory = new Optional<>().getFactory();
-
-    @SuppressWarnings("unchecked")
-    private static <T>
-    CaseClassFactory<Optional<T>> classFactory() {
-        return (CaseClassFactory) classFactory;
-    }
-
     public static <T> Visitor<T, Optional<T>> values() {
-        CaseClassFactory<Optional<T>>.SelfVisitorFactory<Visitor<T, Optional<T>>>
-                factory = Optional.<T>classFactory().selfVisitorFactory();
-
-        return factory.selfVisitor();
+        /**
+         * We could cache the result of getFactory() for efficiency, but this is evidently more readable
+         */
+        return (Visitor<T, Optional<T>>) new Optional<T>().getFactory().values();
     }
 
     public static void main(String[] args) {
