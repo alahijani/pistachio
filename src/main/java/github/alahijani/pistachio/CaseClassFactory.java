@@ -26,19 +26,32 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
         return implCache.get(caseClass);
     }
 
+    private final CaseVisitorFactory<?, ?> caseVisitorFactory;
     private final SelfVisitorFactory<?> selfVisitorFactory;
 
     private <V extends CaseVisitor<CC>>
     CaseClassFactory(Class<CC> caseClass) {
         Class<V> visitorClass = this.<CC, V>getAcceptorType(caseClass);
 
+        caseVisitorFactory = new CaseVisitorFactory<>(visitorClass);
         selfVisitorFactory = new SelfVisitorFactory<>(visitorClass, caseClass);
+    }
+
+    @SuppressWarnings("unchecked")
+    private  <R, V extends CaseVisitor<R>>
+    CaseVisitorFactory<R, V> caseVisitorFactory() {
+        return (CaseVisitorFactory<R, V>) caseVisitorFactory;
     }
 
     @SuppressWarnings("unchecked")
     private <V extends CaseVisitor<CC>>
     SelfVisitorFactory<V> selfVisitorFactory() {
         return (SelfVisitorFactory<V>) selfVisitorFactory;
+    }
+
+    public <R, V extends CaseVisitor<R>>
+    Class<V> visitorClass() {
+        return this.<R, V>caseVisitorFactory().visitorClass;
     }
 
     @SuppressWarnings("unchecked")
@@ -188,12 +201,11 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
 
             return new VisitorInvocationHandler<CC, V>(this.visitorClass) {
                 @Override
-                @SuppressWarnings("unchecked")
                 protected CC handle(V proxy, Method method, Object[] args) throws Throwable {
                     CC instance = handler.handle(proxy, method, args);
 
                     CaseClass<CC>.Acceptor<?, CC> original = instance.acceptor();
-                    CaseClass<CC>.Acceptor<V, CC> acceptor = (CC.Acceptor<V, CC>) original;
+                    CaseClass<CC>.Acceptor<V, CC> acceptor = original.cast(visitorClass);
 
                     return acceptor.accept(postProcessor);
                 }

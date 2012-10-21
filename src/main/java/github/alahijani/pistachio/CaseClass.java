@@ -3,6 +3,7 @@ package github.alahijani.pistachio;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * @author Ali Lahijani
@@ -39,14 +40,17 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
 
     public CaseClassFactory<CC> getFactory() {
         if (factory == null) {
-            factory = CaseClassFactory.get(getDeclaringClass());
+            setFactory(CaseClassFactory.get(getDeclaringClass()));
         }
 
         return factory;
     }
 
     public final class Acceptor<V extends CaseVisitor<R>, R> {
-        public final Class<V> visitorClass;
+        /**
+         * todo visitorClass = constructor.getDeclaringClass()
+         */
+        public Class<V> visitorClass;
 
         /**
          *
@@ -55,15 +59,19 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
             visitorClass = null;
         }
 
-        /**
-         * todo populate and use visitorClass
-         */
         private Acceptor(Class<V> visitorClass) {
             this.visitorClass = visitorClass;
         }
 
         public R accept(V visitor) {
             return CaseClass.this.accept0(visitor);
+        }
+
+        @SuppressWarnings("unchecked")
+        public <W extends CaseVisitor<R>>
+        Acceptor<W, R> cast(Class<W> visitorClass) {
+            visitorClass.asSubclass(this.visitorClass);
+            return (Acceptor<W, R>) this;
         }
 
     }
@@ -105,11 +113,17 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
      * This method is package-private.
      */
     final void assign0(CaseClassFactory<CC> factory, Method constructor, Object... arguments) {
+        setFactory(factory);
+        this.constructor = constructor;
+        this.arguments = arguments;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void setFactory(CaseClassFactory<CC> factory) {
         assert this.factory == null || this.factory == factory;
 
         this.factory = factory;
-        this.constructor = constructor;
-        this.arguments = arguments;
+        this.acceptor.visitorClass = (Class) factory.visitorClass();
     }
 
     /**
@@ -130,6 +144,12 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
     @SuppressWarnings("unchecked")
     private <R>
     R accept0(CaseVisitor<R> visitor) {
+        /**
+         * Validate visitor
+         */
+        Objects.requireNonNull(visitor, "null visitor");
+        this.constructor.getDeclaringClass().cast(visitor);
+
         try {
             return (R) this.constructor.invoke(visitor, this.arguments);
         } catch (IllegalAccessException e) {

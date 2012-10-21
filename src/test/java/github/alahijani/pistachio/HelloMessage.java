@@ -9,15 +9,15 @@ public final class HelloMessage extends MutableCaseClass<HelloMessage> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <R> Acceptor<? super Visitor<R>, R> acceptor() {
-        return (Acceptor<? super Visitor<R>, R>) super.acceptor();
+        return super.<R>acceptor().cast(Visitor.class);
     }
 
     public <R> R accept(Visitor<R> visitor) {
         return this.<R>acceptor().accept(visitor);
     }
 
+    @Override
     public Visitor<HelloMessage> assign() {
         return (Visitor<HelloMessage>) super.assign();
     }

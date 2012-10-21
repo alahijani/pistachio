@@ -8,9 +8,8 @@ import java.lang.reflect.Method;
 public class NewHelloMessage extends CaseClass<NewHelloMessage> {
 
     @Override
-    @SuppressWarnings("unchecked")
     public <R> Acceptor<? super Visitor<R>, R> acceptor() {
-        return (Acceptor<? super Visitor<R>, R>) super.acceptor();
+        return super.<R>acceptor().cast(Visitor.class);
     }
 
     public <R> R accept(Visitor<R> visitor) {

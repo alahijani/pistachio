@@ -9,9 +9,8 @@ public final class Optional<T> extends CaseClass<Optional<T>> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <R> Acceptor<? super Visitor<T, R>, R> acceptor() {
-        return (Acceptor<? super Visitor<T, R>, R>) super.acceptor();
+        return super.<R>acceptor().cast(Visitor.class);
     }
 
     public <R> R accept(Visitor<T, R> visitor) {
@@ -40,7 +39,9 @@ public final class Optional<T> extends CaseClass<Optional<T>> {
 
     public static <T> Visitor<T, Optional<T>> values() {
         /**
-         * We could cache the result of getFactory() for efficiency, but this is evidently more readable
+         * We could cache the result of getFactory() for efficiency,
+         * but this is evidently more readable and also does not flag
+         * an unchecked cast.
          */
         return (Visitor<T, Optional<T>>) new Optional<T>().getFactory().values();
     }
