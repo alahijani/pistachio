@@ -82,8 +82,19 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
      * The covariant return type of this method in a subclass of <code>CaseClass</code> defines the type of
      * visitors that the case class wills to accept.
      * <p/>
-     * A concrete case class should override this method and cast the result to {@code Acceptor<Visitor<R>, R>} where
-     * <code>Visitor</code> is the actual sub-interface of {@link CaseVisitor} that it wills to accept.
+     * A concrete case class for a hypothetical visitor type <code>Visitor</code> should override this method
+     * with a method with return type {@code Acceptor<? super Visitor<R>, R>}. Note that the wildcard <code>?</code>
+     * here is also bound from above by {@code CaseVisitor<R>}, by virtue of being the first type parameter to
+     * {@code Acceptor}.
+     * <p/>
+     * The overriding method should return the result of super-call, {@link Acceptor#cast(Class) cast} to the
+     * expected type with <code>Visitor.class</code>. That is,
+     * <pre>{@code
+     * public @Override <R>
+     * Acceptor<? super Visitor<R>, R> acceptor() {
+     *     return super.<R>acceptor().cast(Visitor.class);
+     * }
+     * }</pre>
      */
     @SuppressWarnings("unchecked")
     public <R>
