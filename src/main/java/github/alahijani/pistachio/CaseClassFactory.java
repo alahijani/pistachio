@@ -176,6 +176,13 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
                 logger.warning("Case class " + caseClass.getName() + " should be declared final");
             }
 
+            for (Constructor<?> constructor : caseClass.getDeclaredConstructors()) {
+                if (!Modifier.isPrivate(constructor.getModifiers())) {
+                    logger.warning("Case class " + caseClass.getName() +
+                            " should only have private constructors. But found: " + constructor);
+                }
+            }
+
             final Constructor<CC> privateConstructor;
 
             try {
