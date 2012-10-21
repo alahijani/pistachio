@@ -38,7 +38,7 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
     }
 
     @SuppressWarnings("unchecked")
-    private  <R, V extends CaseVisitor<R>>
+    private <R, V extends CaseVisitor<R>>
     CaseVisitorFactory<R, V> caseVisitorFactory() {
         return (CaseVisitorFactory<R, V>) caseVisitorFactory;
     }
@@ -93,9 +93,6 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
         }
     }
 
-    /**
-     * @author Ali Lahijani
-     */
     static class CaseVisitorFactory<R, V extends CaseVisitor<R>> {
 
         protected final Class<V> visitorClass;
@@ -106,11 +103,11 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
             this.visitorConstructor = visitorConstructor(this.visitorClass);
         }
 
-    /*
+        /*
         public V uniformVisitor() {
             return null;
         }
-    */
+        */
         private static <V extends CaseVisitor<?>>
         Constructor<? extends V> visitorConstructor(Class<V> visitorClass) {
             try {
@@ -135,23 +132,32 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
 
     }
 
+    /**
+     * Creates a new assigner visitor for the case represented by the given acceptor.
+     *
+     * @throws IllegalArgumentException if the case represented by the given acceptor is not an
+     *                                  instance of {@link MutableCaseClass}
+     */
     public <V extends CaseVisitor<CC>>
-    V assign(CC instance, CaseClass<CC>.Acceptor<V, CC> acceptor) {
+    V assign(CaseClass<CC>.Acceptor<V, CC> acceptor) {
+
+        CC instance = acceptor.thisCase();
+
+        if (!(instance instanceof MutableCaseClass<?>))
+            throw new IllegalArgumentException("instance is not mutable");
+
         return this.<V>selfVisitorFactory().assign(instance);
     }
 
     public <V extends CaseVisitor<CC>>
-    V values(CC.Acceptor<V, CC> acceptor) {
-        return (V) this.values();
+    V values(Class<V> visitorClass) {
+        return visitorClass.cast(this.values());
     }
 
     public CaseVisitor<CC> values() {
         return selfVisitorFactory.selfVisitor();
     }
 
-    /**
-    * @author Ali Lahijani
-    */
     private class SelfVisitorFactory<V extends CaseVisitor<CC>>
             extends CaseVisitorFactory<CC, V> {
 
@@ -165,6 +171,10 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
         public SelfVisitorFactory(Class<V> visitorClass, Class<CC> caseClass, V postProcessor) {
             super(visitorClass);
             this.postProcessor = postProcessor;
+
+            if (!Modifier.isFinal(caseClass.getModifiers())) {
+                logger.warning("Case class " + caseClass.getName() + " should be declared final");
+            }
 
             final Constructor<CC> privateConstructor;
 
@@ -233,9 +243,6 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
 
     }
 
-    /**
-     * @author Ali Lahijani
-     */
     private abstract static class VisitorInvocationHandler<R, V extends CaseVisitor<R>>
             implements InvocationHandler {
 

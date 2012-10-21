@@ -74,6 +74,10 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
             return (Acceptor<W, R>) this;
         }
 
+        public CC thisCase() {
+            return CaseClass.this.thisCase();
+        }
+
     }
 
     private Acceptor<?, ?> acceptor = new Acceptor<>();
