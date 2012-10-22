@@ -6,7 +6,19 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
+ * A direct subclass of <code>CaseClass</code> is called a (concrete) case class. A case class should be
+ * declared final.
+ * <p/>
+ * To every case class is associated a visitor interface, which should extend {@link CaseVisitor}. It is
+ * imperative that a case class overrides the {@link #acceptor() acceptor()} method declared here. The
+ * return type of the overridden method determines the visitor interface associated with a concrete case
+ * class.
+ * <p/>
+ * A concrete case class must declare a private no-args constructor.
+ *
  * @author Ali Lahijani
+ * @see CaseVisitor
+ * @see #acceptor()
  */
 public abstract class CaseClass<CC extends CaseClass<CC>> {
 
@@ -25,6 +37,7 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
 
     /**
      * The factory used for creating this instance
+     * todo possibly replace by constructor.getDeclaringClass()
      */
     private CaseClassFactory<CC> factory;
 
@@ -135,7 +148,7 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
 
     @SuppressWarnings("unchecked")
     private void setFactory(CaseClassFactory<CC> factory) {
-        assert this.factory == null || this.factory == factory;
+        assert this.factory == null || this.factory == factory; // true, even in a race condition
 
         this.factory = factory;
         this.acceptor.visitorClass = (Class) factory.visitorClass();

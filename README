@@ -1,1 +1,12 @@
 Pistachio adds case classes and fluent, type-safe pattern matching to Java
+
+
+Feature not present in Scala case classes or ML datatypes
+=====
+Pistachio case classes support "case classes evolution" through JDK 8 default methods.
+In most languages, if one adds a new case to a case class, all pattern matching statements
+should be updated to take the new case into account. But in Pistachio one can simply add
+a default body to the new case that probably delegates to the most appropriate pre-existing
+case with appropriate parameters.
+
+
