@@ -26,15 +26,79 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
         return implCache.get(caseClass);
     }
 
+    @SuppressWarnings("unchecked")
+    public static <CC extends CaseClass<CC>, V extends CaseVisitor<CC>>
+    CaseClassFactory<CC> get(Class<CC> caseClass, V instantiator) {
+        // todo
+        return implCache.get(caseClass);
+    }
+
     private final CaseVisitorFactory<?, ?> caseVisitorFactory;
     private final SelfVisitorFactory<?> selfVisitorFactory;
+    private final Instantiator<CC> instantiator;
 
     private <V extends CaseVisitor<CC>>
     CaseClassFactory(Class<CC> caseClass) {
+        this(caseClass, null);
+    }
+
+    private <V extends CaseVisitor<CC>>
+    CaseClassFactory(Class<CC> caseClass, final V instantiator) {
         Class<V> visitorClass = this.<CC, V>getAcceptorType(caseClass);
 
         caseVisitorFactory = new CaseVisitorFactory<>(visitorClass);
         selfVisitorFactory = new SelfVisitorFactory<>(visitorClass, caseClass);
+
+        this.instantiator = getInstantiator(caseClass, instantiator);
+    }
+
+    private <V extends CaseVisitor<CC>>
+    Instantiator<CC> getInstantiator(Class<CC> caseClass, final V instantiator) {
+        if (instantiator == null) {
+            final Constructor<CC> privateConstructor;
+
+            try {
+                privateConstructor = caseClass.getDeclaredConstructor();
+                privateConstructor.setAccessible(true);
+            } catch (NoSuchMethodException e) {
+                String message = "Case class " + caseClass.getName() +
+                        " should declare a private no-args constructor";
+                throw new IllegalStateException(message, e);
+            }
+
+            return new Instantiator<CC>() {
+                @Override
+                public CC instantiate(Method method, Object[] args) throws Throwable {
+                    try {
+                        CC instance = privateConstructor.newInstance();
+                        instance.assign0(CaseClassFactory.this, method, args);
+                        return instance;
+                    } catch (InstantiationException e) {
+                        throw e.getCause();
+                    }
+                }
+            };
+        } else {
+            return new Instantiator<CC>() {
+                @Override
+                @SuppressWarnings("unchecked")
+                public CC instantiate(Method method, Object[] args) throws Throwable {
+                    try {
+                        CC instance = (CC) method.invoke(instantiator, args);
+                        instance.assign0(CaseClassFactory.this, method, args);
+                        return instance;
+                    } catch (InvocationTargetException e) {
+                        throw e.getCause();
+                    }
+                }
+            };
+        }
+    }
+
+    private interface Instantiator<CC> {
+
+        CC instantiate(Method method, Object[] args) throws Throwable;
+
     }
 
     @SuppressWarnings("unchecked")
@@ -183,27 +247,10 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
                 }
             }
 
-            final Constructor<CC> privateConstructor;
-
-            try {
-                privateConstructor = caseClass.getDeclaredConstructor();
-                privateConstructor.setAccessible(true);
-            } catch (NoSuchMethodException e) {
-                String message = "Case class " + caseClass.getName() +
-                        " should declare a private no-args constructor";
-                throw new IllegalStateException(message, e);
-            }
-
             VisitorInvocationHandler<CC, V> handler = new VisitorInvocationHandler<CC, V>(this.visitorClass) {
                 @Override
                 protected CC handle(V proxy, Method method, Object[] args) throws Throwable {
-                    try {
-                        CC instance = privateConstructor.newInstance();
-                        instance.assign0(CaseClassFactory.this, method, args);
-                        return instance;
-                    } catch (InvocationTargetException e) {
-                        throw e.getCause();
-                    }
+                    return instantiator.instantiate(method, args);
                 }
             };
 
