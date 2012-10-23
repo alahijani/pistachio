@@ -1,5 +1,6 @@
 package github.alahijani.pistachio;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -20,7 +21,8 @@ import java.util.Objects;
  * @see CaseVisitor
  * @see #acceptor()
  */
-public abstract class CaseClass<CC extends CaseClass<CC>> {
+public abstract class CaseClass<CC extends CaseClass<CC>>
+        implements Serializable {
 
     @SuppressWarnings("unchecked")
     public final Class<CC> getDeclaringClass() {
