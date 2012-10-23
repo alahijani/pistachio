@@ -7,6 +7,9 @@ import java.lang.reflect.Method;
  */
 public class NewHelloMessage extends CaseClass<NewHelloMessage> {
 
+    private NewHelloMessage() {
+    }
+
     @Override
     public <R> Acceptor<? super Visitor<R>, R> acceptor() {
         return super.<R>acceptor().cast(Visitor.class);
@@ -52,8 +55,8 @@ public class NewHelloMessage extends CaseClass<NewHelloMessage> {
             System.out.println("(newHelloWorld == oldHelloWorld) = " + newHelloWorld.equals(oldHelloWorld));
             System.out.println("(newHelloWorld == oldHelloWorld) = " + newHelloWorld.equals(NewHelloMessage.from(oldHelloWorld)));
 
-            CaseClass<?>.Acceptor<? super NewHelloMessage.Visitor<Void>, Void> newAcceptor = newHelloWorld.acceptor();
-            CaseClass<?>.Acceptor<? super HelloMessage.Visitor<Void>, Void> oldAcceptor = oldHelloWorld.acceptor();
+            CaseClass.Acceptor<? super NewHelloMessage.Visitor<Void>, Void> newAcceptor = newHelloWorld.acceptor();
+            CaseClass.Acceptor<? super HelloMessage.Visitor<Void>, Void> oldAcceptor = oldHelloWorld.acceptor();
 
             newAcceptor = oldAcceptor;
 //            oldAcceptor = newAcceptor;
