@@ -22,16 +22,9 @@ import java.util.Objects;
  */
 public abstract class CaseClass<CC extends CaseClass<CC>> {
 
-    /**
-     * This method is package-private.
-     */
-    @SuppressWarnings("unchecked")
-    final CC thisCase() {
-        return (CC) this;
-    }
-
     @SuppressWarnings("unchecked")
     public final Class<CC> getDeclaringClass() {
+        // todo wrong! sometimes should return getClass().getSuperclass()
         return (Class<CC>) getClass();
     }
 
@@ -194,14 +187,6 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
 
         this.factory = factory;
         this.acceptor.visitorClass = (Class) factory.visitorClass();
-    }
-
-    /**
-     * This method is package-private.
-     */
-    final void assign0(CC lvalue) {
-        CaseClass<CC> that = lvalue;
-        assign0(that.factory, that.constructor, that.arguments);
     }
 
     /**
