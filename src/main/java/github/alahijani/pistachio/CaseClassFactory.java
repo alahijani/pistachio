@@ -114,6 +114,27 @@ public class CaseClassFactory<CC extends CaseClass<CC>>
         }
     }
 
+    public CC valueOf(String name,
+                      Object... arguments) {
+        int length = arguments.length;
+        Class<?>[] parameterTypes = new Class<?>[length];
+        for (int i = 0; i < length; i++) {
+            parameterTypes[i] = arguments[i].getClass();
+        }
+        return valueOf(name, parameterTypes, arguments);
+    }
+    
+    public CC valueOf(String name,
+                      Class<?>[] parameterTypes,
+                      Object... arguments) {
+        try {
+            Method constructor = visitorClass().getMethod(name, parameterTypes);
+            return instantiator.instantiate(constructor, arguments);
+        } catch (Throwable throwable) {
+            throw new IllegalArgumentException(throwable);
+        }
+    }
+    
     private interface Instantiator<CC> {
 
         CC instantiate(Method method, Object[] args) throws Throwable;
