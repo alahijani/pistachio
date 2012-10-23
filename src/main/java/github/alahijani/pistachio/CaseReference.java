@@ -8,6 +8,7 @@ import java.lang.*;
 public class CaseReference<CC extends CaseClass<CC>, V extends CaseVisitor<java.lang.Void>> {
 
     private CC value;
+    private final V assign;
 
     /**
      * Constructs a new {@code CaseReference} with the given initial value. The provided value should not be
@@ -41,12 +42,6 @@ public class CaseReference<CC extends CaseClass<CC>, V extends CaseVisitor<java.
         this.value = value;
     }
 
-    private final V assign;
-
-    /**
-     * A concrete mutable case class should override this method and cast the result to the actual sub-interface of
-     * <code>CaseVisitor</code>.
-     */
     public V set() {
         return assign;
     }
