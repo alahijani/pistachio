@@ -61,8 +61,8 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
                 privateConstructor = caseClass.getDeclaredConstructor();
                 privateConstructor.setAccessible(true);
             } catch (NoSuchMethodException e) {
-                String message = "Case class " + caseClass.getName() +
-                        " should declare a private no-args constructor";
+                String message = "Cannot find a private no-args constructor in "+
+                        "case class " + caseClass.getName();
                 throw new IllegalStateException(message, e);
             }
 
