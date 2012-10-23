@@ -142,9 +142,7 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
         if (arguments == null) {
             return constructor.getName();
         } else {
-            String args = Arrays.toString(arguments);
-            args = "(" + args.substring(1, args.length() - 1) + ")";    // replace [] with ()
-            return constructor.getName() + args;
+            return constructor.getName() + Arrays.toString(arguments);
         }
     }
 
