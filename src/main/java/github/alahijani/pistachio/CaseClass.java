@@ -59,6 +59,30 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
         return factory;
     }
 
+    /**
+     * @return A method declared in a subclass of {@link CaseVisitor} that has been used to create this instance, or
+     *         has been later {@link MutableCaseClass#assign() assigned} to it.
+     */
+    public Method constructor() {
+        return constructor;
+    }
+
+    /**
+     * @return The actual arguments passed when this instance was created or last
+     *         {@link MutableCaseClass#assign() assigned} to.
+     */
+    public Object[] arguments() {
+        return arguments.clone();
+    }
+
+    public String name() {
+        return constructor.getName();
+    }
+
+    public Class<?>[] parameterTypes() {
+        return constructor.getParameterTypes();
+    }
+
     public final class Acceptor<V extends CaseVisitor<R>, R> {
         /**
          * todo visitorClass = constructor.getDeclaringClass()
