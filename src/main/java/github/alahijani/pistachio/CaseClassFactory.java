@@ -241,12 +241,8 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
             super(visitorClass);
             this.postProcessor = postProcessor;
 
-            if (!Modifier.isFinal(caseClass.getModifiers())) {
-                logger.warning("Case class " + caseClass.getName() + " should be declared final");
-            }
-
             for (Constructor<?> constructor : caseClass.getDeclaredConstructors()) {
-                if (!Modifier.isPrivate(constructor.getModifiers())) {
+                if (!Modifier.isPrivate(constructor.getModifiers()) && !constructor.isSynthetic()) {
                     logger.warning("Case class " + caseClass.getName() +
                             " should only have private constructors. But found: " + constructor);
                 }
