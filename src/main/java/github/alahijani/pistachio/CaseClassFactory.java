@@ -1,13 +1,17 @@
 package github.alahijani.pistachio;
 
-import java.lang.*;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.lang.reflect.*;
 import java.util.logging.Logger;
 
 /**
  * @author Ali Lahijani
  */
-public class CaseClassFactory<CC extends CaseClass<CC>> {
+public class CaseClassFactory<CC extends CaseClass<CC>>
+        implements Serializable {
+
+    private static final long serialVersionUID = 6394330955394818507L;
 
     private static Logger logger = Logger.getLogger(CaseClassFactory.class.getName());
 
@@ -27,23 +31,38 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
         return implCache.get(caseClass);
     }
 
+    /**
+     * TODO returns the same reference for the same (caseClass, instantiator) pair
+     * @param instantiator should be Serializable, otherwise the created case values will not be
+     *                     Serializable either.
+     */
     @SuppressWarnings("unchecked")
     public static <CC extends CaseClass<CC>, V extends CaseVisitor<CC>>
     CaseClassFactory<CC> get(Class<CC> caseClass, V instantiator) {
         return new CaseClassFactory<>(caseClass, instantiator);
     }
 
-    private final CaseVisitorFactory<?, ?> caseVisitorFactory;
-    private final SelfVisitorFactory<?> selfVisitorFactory;
-    private final Instantiator<CC> instantiator;
+    private Class<CC> _caseClass;
+    private CaseVisitor<CC> _instantiator;
 
-    private <V extends CaseVisitor<CC>>
+    Object readResolve() throws ObjectStreamException {
+        return CaseClassFactory.get(_caseClass, _instantiator);
+    }
+
+    private transient final CaseVisitorFactory<?, ?> caseVisitorFactory;
+    private transient final SelfVisitorFactory<?> selfVisitorFactory;
+    private transient final Instantiator<CC> instantiator;
+
+    private
     CaseClassFactory(Class<CC> caseClass) {
         this(caseClass, null);
     }
 
     private <V extends CaseVisitor<CC>>
     CaseClassFactory(Class<CC> caseClass, final V instantiator) {
+        _caseClass = caseClass;
+        _instantiator = instantiator;
+
         Class<V> visitorClass = this.<CC, V>getAcceptorType(caseClass);
 
         caseVisitorFactory = new CaseVisitorFactory<>(visitorClass);

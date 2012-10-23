@@ -1,5 +1,6 @@
 package github.alahijani.pistachio;
 
+import java.io.*;
 import java.lang.reflect.Method;
 
 /**
@@ -41,7 +42,7 @@ public class NewHelloMessage extends CaseClass<NewHelloMessage> {
         return instance.accept(NewHelloMessage.values());
     }
 
-    public static void main(String[] args) throws NoSuchMethodException {
+    public static void main(String[] args) throws NoSuchMethodException, IOException, ClassNotFoundException {
         {
             Method helloWorld1 = Visitor.class.getMethod("helloWorld");
             Method helloWorld2 = HelloMessage.Visitor.class.getMethod("helloWorld");
@@ -63,6 +64,16 @@ public class NewHelloMessage extends CaseClass<NewHelloMessage> {
 
             NewHelloMessage.Visitor<Void> newVisitor = null;
             HelloMessage.Visitor<Void> oldVisitor = null;
+
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            ObjectOutputStream out = new ObjectOutputStream(buffer);
+            out.writeObject(newHelloWorld);
+            out.close();
+
+            ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(buffer.toByteArray()));
+            NewHelloMessage back = (NewHelloMessage) in.readObject();
+            System.out.println("(back == newHelloWorld) = " + back.equals(newHelloWorld));
+            System.out.println("(back.factory == newHelloWorld.factory) = " + (back.factory() == newHelloWorld.factory()));
 
             CaseVisitor<Void> caseVisitor = null;
             newAcceptor.accept(newVisitor);

@@ -1,5 +1,6 @@
 package github.alahijani.pistachio;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -23,6 +24,8 @@ import java.util.Objects;
  */
 public abstract class CaseClass<CC extends CaseClass<CC>>
         implements Serializable {
+
+    private static final long serialVersionUID = -2280890628950959299L;
 
     @SuppressWarnings("unchecked")
     public final Class<CC> getDeclaringClass() {
@@ -78,7 +81,9 @@ public abstract class CaseClass<CC extends CaseClass<CC>>
         return constructor.getParameterTypes();
     }
 
-    public static class Acceptor<V extends CaseVisitor<R>, R> {
+    public static class Acceptor<V extends CaseVisitor<R>, R>
+            implements Serializable {
+
         /**
          * todo visitorClass = constructor.getDeclaringClass()
          */
@@ -228,6 +233,28 @@ public abstract class CaseClass<CC extends CaseClass<CC>>
             throw (RuntimeException) e;
 
         throw new RuntimeException(e);
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out)
+            throws IOException {
+        assert factory != null;
+        out.writeObject(factory);
+        out.writeUTF(name());
+        out.writeObject(parameterTypes());
+        out.writeObject(arguments);
+    }
+
+    private void readObject(java.io.ObjectInputStream in)
+            throws IOException, ClassNotFoundException {
+        try {
+            factory = (CaseClassFactory<CC>) in.readObject();
+            String name = in.readUTF();
+            Class<?>[] parameterTypes = (Class<?>[]) in.readObject();
+            constructor = factory.visitorClass().getMethod(name, parameterTypes);
+            arguments = (Object[]) in.readObject();
+        } catch (NoSuchMethodException e) {
+            throw new IOException(e);
+        }
     }
 
 }
