@@ -1,5 +1,6 @@
 package github.alahijani.pistachio;
 
+import javax.tools.JavaFileObject;
 import java.util.*;
 
 /**
@@ -82,5 +83,12 @@ public class FileType extends CaseClass<FileType> {
         for (FileType fileType : list) {
             System.out.println("fileType = " + fileType + ", fileType.extension = " + fileType.extension);
         }
+
+        System.out.println();
+        System.out.println("----------");
+        for (JavaFileObject.Kind fileType : JavaFileObject.Kind.values()) {
+            System.out.println("fileType = " + fileType + ", fileType.extension = " + fileType.extension);
+        }
+
     }
 }

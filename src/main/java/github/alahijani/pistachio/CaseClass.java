@@ -137,6 +137,17 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
         return result;
     }
 
+    @Override
+    public String toString() {
+        if (arguments == null) {
+            return constructor.getName();
+        } else {
+            String args = Arrays.toString(arguments);
+            args = "(" + args.substring(1, args.length() - 1) + ")";    // replace [] with ()
+            return constructor.getName() + args;
+        }
+    }
+
     /**
      * This method is package-private.
      */

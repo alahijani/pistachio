@@ -70,6 +70,11 @@ public final class HelloMessage extends MutableCaseClass<HelloMessage> {
         HelloMessage hello2 = HelloMessage.values().hello("John");
         HelloMessage hello3 = HelloMessage.values().hello("Mr", "Smith");
 
+        System.out.println(hello1);
+        System.out.println(hello2);
+        System.out.println(hello3);
+        System.out.println();
+
         System.out.println(hello1.accept(toString));
         System.out.println(hello2.accept(toString));
         System.out.println(hello3.accept(toString));
