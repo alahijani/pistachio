@@ -191,7 +191,7 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
 
         @SuppressWarnings("unchecked")
         <CC extends CaseClass<CC>, W extends CaseVisitor<R>>
-        CaseClass<CC>.Acceptor<V, R> cast(CaseClass<CC>.Acceptor<W, R> acceptor) {
+        CaseClass.Acceptor<V, R> cast(CaseClass.Acceptor<W, R> acceptor) {
 
             if (!acceptor.visitorClass.isAssignableFrom(this.visitorClass))
                 throw new ClassCastException(this.visitorClass.toString());
@@ -208,9 +208,10 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
      *                                  instance of {@link MutableCaseClass}
      */
     public <V extends CaseVisitor<CC>>
-    V assign(CaseClass<CC>.Acceptor<V, CC> acceptor) {
+    V assign(CaseClass.Acceptor<V, CC> acceptor) {
 
-        CC instance = acceptor.thisCase();
+        @SuppressWarnings("unchecked")
+        CC instance = (CC) acceptor.thisCase();
 
         if (!(instance instanceof MutableCaseClass<?>))
             throw new IllegalArgumentException("instance is not mutable");
@@ -269,8 +270,8 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
                 protected CC handle(V proxy, Method method, Object[] args) throws Throwable {
                     CC instance = handler.handle(proxy, method, args);
 
-                    CaseClass<CC>.Acceptor<?, CC> original = instance.acceptor();
-                    CaseClass<CC>.Acceptor<V, CC> acceptor = original.cast(visitorClass);
+                    CaseClass.Acceptor<?, CC> original = instance.acceptor();
+                    CaseClass.Acceptor<V, CC> acceptor = original.cast(visitorClass);
 
                     return acceptor.accept(postProcessor);
                 }

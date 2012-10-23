@@ -83,25 +83,28 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
         return constructor.getParameterTypes();
     }
 
-    public final class Acceptor<V extends CaseVisitor<R>, R> {
+    public static class Acceptor<V extends CaseVisitor<R>, R> {
         /**
          * todo visitorClass = constructor.getDeclaringClass()
          */
         public Class<V> visitorClass;
+        private CaseClass<?> thisCase;
 
         /**
          *
          */
-        private Acceptor() {
-            visitorClass = null;
+        private Acceptor(CaseClass<?> thisCase) {
+            this.visitorClass = null;
+            this.thisCase = thisCase;
         }
 
-        private Acceptor(Class<V> visitorClass) {
+        private Acceptor(CaseClass<?> thisCase, Class<V> visitorClass) {
             this.visitorClass = visitorClass;
+            this.thisCase = thisCase;
         }
 
         public R accept(V visitor) {
-            return CaseClass.this.accept0(visitor);
+            return thisCase.accept0(visitor);
         }
 
         @SuppressWarnings("unchecked")
@@ -111,13 +114,13 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
             return (Acceptor<W, R>) this;
         }
 
-        public CC thisCase() {
-            return CaseClass.this.thisCase();
+        public CaseClass<?> thisCase() {
+            return thisCase;
         }
 
     }
 
-    private Acceptor<?, ?> acceptor = new Acceptor<>();
+    private Acceptor<?, ?> acceptor = new Acceptor<>(this);
 
     /**
      * The covariant return type of this method in a subclass of <code>CaseClass</code> defines the type of
