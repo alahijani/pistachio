@@ -5,6 +5,14 @@ package github.alahijani.pistachio;
  */
 public final class HelloMessage extends MutableCaseClass<HelloMessage> {
 
+    public interface Visitor<R> extends CaseVisitor<R> {
+        R helloWorld();
+
+        R hello(String name);
+
+        R hello(String title, String name);
+    }
+
     private HelloMessage() {
     }
 
@@ -20,17 +28,6 @@ public final class HelloMessage extends MutableCaseClass<HelloMessage> {
     @Override
     public Visitor<HelloMessage> assign() {
         return (Visitor<HelloMessage>) super.assign();
-    }
-
-    /**
-     *
-     */
-    public interface Visitor<R> extends CaseVisitor<R> {
-        R helloWorld();
-
-        R hello(String name);
-
-        R hello(String title, String name);
     }
 
     private static final CaseClassFactory<HelloMessage> classFactory = new HelloMessage().factory();

@@ -5,6 +5,12 @@ package github.alahijani.pistachio;
  */
 public final class Optional<T> extends CaseClass<Optional<T>> {
 
+    public interface Visitor<T, R> extends CaseVisitor<R> {
+        R none();
+
+        R some(T t);
+    }
+
     private Optional() {
     }
 
@@ -26,15 +32,6 @@ public final class Optional<T> extends CaseClass<Optional<T>> {
                 return t;
             }
         });
-    }
-
-    /**
-     *
-     */
-    public interface Visitor<T, R> extends CaseVisitor<R> {
-        R none();
-
-        R some(T t);
     }
 
     public static <T> Visitor<T, Optional<T>> values() {

@@ -7,6 +7,13 @@ import java.lang.reflect.Method;
  */
 public class NewHelloMessage extends CaseClass<NewHelloMessage> {
 
+    public interface Visitor<R> extends HelloMessage.Visitor<R> {
+        R helloNewWorld();
+
+        @Override
+        R helloWorld();
+    }
+
     private NewHelloMessage() {
     }
 
@@ -17,13 +24,6 @@ public class NewHelloMessage extends CaseClass<NewHelloMessage> {
 
     public <R> R accept(Visitor<R> visitor) {
         return this.<R>acceptor().accept(visitor);
-    }
-
-    public interface Visitor<R> extends HelloMessage.Visitor<R> {
-        R helloNewWorld();
-
-        @Override
-        R helloWorld();
     }
 
     private static final CaseClassFactory<NewHelloMessage> classFactory = new NewHelloMessage().factory();
