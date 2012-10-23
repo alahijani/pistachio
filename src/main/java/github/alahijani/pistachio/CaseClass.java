@@ -6,8 +6,8 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * A direct subclass of <code>CaseClass</code> is called a (concrete) case class. A case class should be
- * declared final.
+ * A direct subclass of <code>CaseClass</code> is called a (concrete) case class. A case class should only
+ * have private constructors.
  * <p/>
  * To every case class is associated a visitor interface, which should extend {@link CaseVisitor}. It is
  * imperative that a case class overrides the {@link #acceptor() acceptor()} method declared here. The
