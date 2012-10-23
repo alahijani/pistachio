@@ -29,8 +29,7 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
     @SuppressWarnings("unchecked")
     public static <CC extends CaseClass<CC>, V extends CaseVisitor<CC>>
     CaseClassFactory<CC> get(Class<CC> caseClass, V instantiator) {
-        // todo
-        return implCache.get(caseClass);
+        return new CaseClassFactory<>(caseClass, instantiator);
     }
 
     private final CaseVisitorFactory<?, ?> caseVisitorFactory;
@@ -123,7 +122,7 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
     Class<V> getAcceptorType(Class<CC> caseClass) {
         try {
 
-            Method acceptor = caseClass.getMethod("acceptor");
+            Method acceptor = caseClass.getDeclaredMethod("acceptor");
 
             Type returnType = acceptor.getGenericReturnType();
             if (returnType instanceof Class<?>) {
@@ -143,7 +142,13 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
                     } else if (visitorType instanceof ParameterizedType) {
                         visitorType = ((ParameterizedType) visitorType).getRawType();
                     } else if (visitorType instanceof WildcardType) {
-                        visitorType = ((WildcardType) visitorType).getLowerBounds()[0];
+                        Type[] lowerBounds = ((WildcardType) visitorType).getLowerBounds();
+                        if (lowerBounds.length ==0) {
+                            throw new IllegalArgumentException("Method " + caseClass.getName() + ".acceptor() " +
+                                    "must have a return type of the form Acceptor<? super Visitor<R>, R> " +
+                                    "in which Visitor<R> is an interface extending " + CaseVisitor.class.getName() + "<R>");
+                        }
+                        visitorType = lowerBounds[0];
                     } else {
                         throw new AssertionError("Strange method signature: " + acceptor);
                     }
@@ -153,7 +158,7 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
             }
 
         } catch (NoSuchMethodException e) {
-            throw new AssertionError(e);
+            throw new IllegalArgumentException("Case class " + caseClass.getName() + " must override acceptor()", e);
         }
     }
 
