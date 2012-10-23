@@ -51,7 +51,7 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
      */
     private Object[] arguments;
 
-    public CaseClassFactory<CC> getFactory() {
+    public CaseClassFactory<CC> factory() {
         if (factory == null) {
             setFactory(CaseClassFactory.get(getDeclaringClass()));
         }

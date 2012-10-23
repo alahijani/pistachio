@@ -23,7 +23,7 @@ public class NewHelloMessage extends CaseClass<NewHelloMessage> {
         R helloWorld();
     }
 
-    private static final CaseClassFactory<NewHelloMessage> classFactory = new NewHelloMessage().getFactory();
+    private static final CaseClassFactory<NewHelloMessage> classFactory = new NewHelloMessage().factory();
 
     public static Visitor<NewHelloMessage> values() {
         return (Visitor<NewHelloMessage>) classFactory.values();

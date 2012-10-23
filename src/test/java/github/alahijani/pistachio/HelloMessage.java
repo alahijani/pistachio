@@ -33,7 +33,7 @@ public final class HelloMessage extends MutableCaseClass<HelloMessage> {
         R hello(String title, String name);
     }
 
-    private static final CaseClassFactory<HelloMessage> classFactory = new HelloMessage().getFactory();
+    private static final CaseClassFactory<HelloMessage> classFactory = new HelloMessage().factory();
 
     public static Visitor<HelloMessage> values() {
         return (Visitor<HelloMessage>) classFactory.values();
