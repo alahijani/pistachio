@@ -61,7 +61,7 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
 
     /**
      * @return A method declared in a subclass of {@link CaseVisitor} that has been used to create this instance, or
-     *         has been later {@link MutableCaseClass#assign() assigned} to it.
+     *         has been later {@link CaseReference#set() assigned} to it.
      */
     public Method constructor() {
         return constructor;
@@ -69,7 +69,7 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
 
     /**
      * @return The actual arguments passed when this instance was created or last
-     *         {@link MutableCaseClass#assign() assigned} to.
+     *         {@link CaseReference#set() assigned} to.
      */
     public Object[] arguments() {
         return arguments.clone();
@@ -111,6 +111,12 @@ public abstract class CaseClass<CC extends CaseClass<CC>> {
         public <W extends CaseVisitor<R>>
         Acceptor<W, R> cast(Class<W> visitorClass) {
             visitorClass.asSubclass(this.visitorClass);
+            return cast();
+        }
+
+        @SuppressWarnings("unchecked")
+        public <W extends CaseVisitor<R>>
+        Acceptor<W, R> cast() {
             return (Acceptor<W, R>) this;
         }
 

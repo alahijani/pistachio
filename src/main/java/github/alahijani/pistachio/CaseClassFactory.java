@@ -1,5 +1,6 @@
 package github.alahijani.pistachio;
 
+import java.lang.*;
 import java.lang.reflect.*;
 import java.util.logging.Logger;
 
@@ -205,23 +206,27 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
      * Creates a new assigner visitor for the case represented by the given acceptor.
      *
      * @throws IllegalArgumentException if the case represented by the given acceptor is not an
-     *                                  instance of {@link MutableCaseClass}
+     *                                  instance of {@link CaseReference}
      */
-    public <V extends CaseVisitor<CC>>
-    V assign(CaseClass.Acceptor<V, CC> acceptor) {
+    public <V extends CaseVisitor<java.lang.Void>>
+    V assign(final CaseReference<CC, V> ref) {
+        CaseVisitorFactory<java.lang.Void, V> factory = caseVisitorFactory();
 
-        @SuppressWarnings("unchecked")
-        CC instance = (CC) acceptor.thisCase();
+        VisitorInvocationHandler<java.lang.Void, V> handler = new VisitorInvocationHandler<java.lang.Void, V>(factory.visitorClass) {
+            @SuppressWarnings("unchecked")
+            @Override
+            protected java.lang.Void handle(V proxy, Method method, Object[] args) throws Throwable {
+                ref.set((CC) method.invoke(values(), args));
+                return null;
+            }
+        };
 
-        if (!(instance instanceof MutableCaseClass<?>))
-            throw new IllegalArgumentException("instance is not mutable");
-
-        return this.<V>selfVisitorFactory().assign(instance);
+        return handler.newVisitor(factory.visitorConstructor);
     }
 
     public <V extends CaseVisitor<CC>>
     V values(Class<V> visitorClass) {
-        return visitorClass.cast(this.values());
+        return visitorClass.cast(values());
     }
 
     public CaseVisitor<CC> values() {
@@ -276,21 +281,6 @@ public class CaseClassFactory<CC extends CaseClass<CC>> {
                     return acceptor.accept(postProcessor);
                 }
             };
-        }
-
-        private V assign(final CC instance) {
-
-            VisitorInvocationHandler<CC, V> handler = new VisitorInvocationHandler<CC, V>(visitorClass) {
-                @Override
-                protected CC handle(V proxy, Method method, Object[] args) throws Throwable {
-                    instance.assign0(CaseClassFactory.this, method, args);
-                    return instance;
-                }
-            };
-
-            handler = applyPostProcessor(handler);
-
-            return handler.newVisitor(visitorConstructor);
         }
 
         V selfVisitor() {

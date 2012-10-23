@@ -3,7 +3,7 @@ package github.alahijani.pistachio;
 /**
  * @author Ali Lahijani
  */
-public final class HelloMessage extends MutableCaseClass<HelloMessage> {
+public final class HelloMessage extends CaseClass<HelloMessage> {
 
     public interface Visitor<R> extends CaseVisitor<R> {
         R helloWorld();
@@ -25,19 +25,10 @@ public final class HelloMessage extends MutableCaseClass<HelloMessage> {
         return this.<R>acceptor().accept(visitor);
     }
 
-    @Override
-    public Visitor<HelloMessage> assign() {
-        return (Visitor<HelloMessage>) super.assign();
-    }
-
     private static final CaseClassFactory<HelloMessage> classFactory = new HelloMessage().factory();
 
     public static Visitor<HelloMessage> values() {
         return (Visitor<HelloMessage>) classFactory.values();
-    }
-
-    public static Visitor<HelloMessage> create() {
-        return new HelloMessage().assign();
     }
 
     /**
@@ -98,20 +89,22 @@ public final class HelloMessage extends MutableCaseClass<HelloMessage> {
         };
 
         System.out.println("Randomizing...");
-        HelloMessage hello = (Math.random() < 0.5) ? (Math.random() < 0.5)
+        HelloMessage helloX = (Math.random() < 0.5) ? (Math.random() < 0.5)
                 ? hello1
                 : hello2
                 : hello3;
 
-        System.out.println(hello.accept(toString));
-        hello.accept(analyzer);
+        CaseReference<HelloMessage, Visitor<java.lang.Void>> hello = new CaseReference<>(helloX);
+
+        System.out.println(hello.get().accept(toString));
+        hello.get().accept(analyzer);
         System.out.println();
 
         System.out.println("Assigning a value...");
-        hello.assign().hello("Jack");
+        hello.set().hello("Jack");
 
-        System.out.println(hello.accept(toString));
-        hello.accept(analyzer);
+        System.out.println(hello.get().accept(toString));
+        hello.get().accept(analyzer);
         System.out.println();
     }
 
